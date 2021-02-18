@@ -1,0 +1,27 @@
+@startuml
+hide circle
+skinparam linetype ortho
+
+entity "Cobranca" as cob {
+  *id_cobranca : uid <<generated>>
+  --
+  *destinatario : Destinatario
+  *valor : decimal
+  vencimento : timestamp
+  links : String[id_link...]
+}
+note right of cob::links
+  lista com o id dos links
+end note
+
+entity "LinkPagamento" as li {
+    *id_link : uid <<generated>>
+    --
+    *parent : uid (id_cobranca)
+    valor : decimal
+    vencimento : timestamp
+    status : StatusLinkPagamento
+}
+
+cob ||..|{ li
+@enduml

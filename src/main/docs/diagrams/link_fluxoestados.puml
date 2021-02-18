@@ -1,0 +1,27 @@
+@startuml
+hide empty description
+left to right direction
+state link_pagamento {
+[*] --> WAITING_PAIMENT
+
+WAITING_PAIMENT --> LINK_CANCELLED : usuario cancelou
+LINK_CANCELLED --> notificacao <<exitPoint>>
+
+WAITING_PAIMENT --> LINK_EXPIRED : prazo de pagamento \nultrapassado
+LINK_EXPIRED --> notificacao <<exitPoint>>
+
+WAITING_PAIMENT --> LINK_PAID : pagamento efetuado
+LINK_PAID --> notificacao <<exitPoint>>
+}
+
+state cobranca {
+[*] --> CHARGE_OPEN
+CHARGE_OPEN --> WAITING_PAYMENT
+WAITING_PAYMENT --> CHARGE_PAID
+CHARGE_PAID --> [*]
+
+WAITING_PAYMENT --> CHARGE_CANCELED
+CHARGE_CANCELED --> [*]
+}
+notificacao --> WAITING_PAYMENT
+@enduml

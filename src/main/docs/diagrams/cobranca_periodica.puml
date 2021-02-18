@@ -1,0 +1,33 @@
+@startuml
+left to right direction
+map link_1 {
+ valor => 100,00
+ vencimento => 15/01
+}
+
+map link_2 {
+ valor => 100,00
+ vencimento => 15/02
+}
+
+map link_3 {
+ valor => 100,00
+ vencimento => 15/03
+}
+
+object link_x {
+ ...
+}
+
+map cobranca {
+ valor => 100,00
+ vencimento => dia 15
+ links *--> link_1
+ links *--> link_2
+ links *--> link_3
+ links *--> link_x
+}
+
+
+
+@enduml

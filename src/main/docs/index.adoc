@@ -1,0 +1,200 @@
+= AsciiDoc Writer's Guide
+Doc Writer <doc.writer@asciidoctor.org>
+v1.0, 2014-08-01
+:toc: left
+
+== Visão geral
+
+O Paybook é um aplicativo que permite a um usuário criar cobranças para serem enviadas a contatos, acompanhar seu status de pagamento, e posteriormente receber o valor pago.
+
+A operacionalização ocorre por meio de três artefatos básicos: books, cobranças e link de pagamento.
+
+**Book**: é uma coleção de cobranças.
+Alguns book permitem definir um conjunto de configurações default para as cobranças cadastradas neles, e outros atuam como gestores das cobranças.
+
+**Cobrança**: é o artefato que permite gerar uma cobrança.
+De forma básica, possui um valor, uma data de expiração, e um destinatario.
+Uma cobrança pode ter um ou varios links de pagamento.
+O link é enviado ao destinatario para que possa realizar seu pagamento.
+Quando todos os links de uma cobrança são quitados, a cobrança é dada como 'paga'.
+
+**Link de pagamento**: é o objeto por meio do qual a cobranca é paga.
+Toda cobrança possui ao menos um link de pagamento.
+Cada link de uma corança pode ser considerado uma *parcela* Quando o link é pago, a cobrança pode ser encerrar, no caso de cobrança única, ou não, no caso de cobrança parcelada em mais de um link ou cobrança recorrente, onde os links são gerados de forma periódica.
+
+O caso de uso abaixo apresenta a criação de uma cobrança genérica no aplicativo.
+
+[plantuml,align="center"]
+----
+include::diagrams/usecase_uso_geral.puml[]
+----
+
+O usuário pode ter diversas cobranças cadastradas ao mesmo tempo.
+Pode ter quantos books de cobrança desejar, todos do mesmo tipo, ou de tipos diferentes.
+O recomendado é que os book sejam organizados por afinidade entre as cobranças.
+Por exemplo: um book para cobrança das aulas particulares, outro book para a divisão das despesas dos encontros semanais da turma.
+
+== Estrutura dos documentos
+
+=== Cobrança e links de pagamento
+
+Toda cobrança possui 1 ou multiplos links de pagamento.
+Links de pagamento são armazenados em uma coleção específica, chamada "links".
+O documento de link armazena as informações necessarios para gerar uma página de pagamento.
+Além disso, possui o id da cobrança pai e o id do destinatario.
+
+[plantuml,align="center"]
+----
+include::diagrams/cobranca_links.puml[]
+----
+
+*valor*: na cobrança é armazenado o valor total que será cobrado.
+Os links armazenam o valor de cada parcela do pagamento (no caso de multiplos links) ou o valor total, no caso de um único link.
+*vencimento*: na cobrança, diz respeito ao vencimento da mesma.
+No caso de uma cobrança com multiplas parcelas, cada link terá uma data de vencimento.
+No caso de cobranças periódicas, o vencimento se refere a frequência com que a cobrança gera links para pagamento, onde cada link possuirá uma data especifica de vencimento.
+
+[plantuml,align="center"]
+----
+include::diagrams/cobranca_periodica.puml[]
+----
+
+No esquema acima, uma cobrança possui seu vencimento todo dia 15. Desta forma, os links são gerados todo mês, com vencimento no dia 15.
+
+=== Pagamento de link e quitação de cobrança
+
+Os links de pagamento seguem o seguinte fluxo de estados:
+
+[plantuml,align="center"]
+----
+include::diagrams/link_fluxoestados.puml[]
+----
+
+Ao pagar o link, a cobranca ao qual ele pertence é notificada para tratar o pagamento.
+Caso a cobrança tenha apenas uma parcela, ela é quitada e encerrada.
+Caso possua mais de uma parcela, a quitação ocorre apenas quando todas são pagas.
+Em caso de cobranças recorrentes, a quitação fica restrita apenas a parcela, mantendo a cobrança como ATIVA. Para maiores detalhes a respeito do fluxo das cobranças, consultar cada tipo em específico.
+
+== Books e tipos de cobrança
+
+=== API comum para todos os tipos de cobranca
+
+```
+ GET /cobrancas/{tipo_book}/{tipo_cobranca}/{id_cobranca}
+200: OK - retorna o map<string,object> do documento recuperado da base
+404: NOT_FOUND - caso de algum dos parametros seja invalido
+```
+
+=== 101 - Book simples
+
+Book onde as cobranças são cadastradas de forma individual, de acordo com a necessidade.
+Permite as seguintes cobranças:
+- simples: 111 É possivel definir um conjunto de configurações default em um book simples, que serão utilizadas na criação das cobranças do book (prazo padrão, multa por atraso, etc)
+
+==== 111 - Cobrança simples
+
+Cobrança que ocorre de forma única com um valor inicialmente definido e um destinatário.
+A cobrança pode ser feita em uma ou mais parcelas.
+Assim que todas as parcelas forem pagas, a cobrança fica quitada.
+Uma vez quitada, não pode mais ser utilizada.
+Ao criar a cobrança, o servidor atribui a cada parcela de pagamento um id, permitindo que a parcela seja obtida sem necessidade de obter toda a cobrança.
+
+Por padrão, quando a cobrança é criada, um link de pagamento é criado e vinculado a ela.
+O link possui os mesmos dados da cobrança (valor, destinatario e vencimento).
+É possivel alterar a cobrança, refletindo em alterações no link de pagamento.
+
+[source]
+----
+ REGISTRO DE COBRANCA
+ PUT /cobrancas/101/111/
+ // faz o registro da mesma, criando os links de pagamento necessarios.
+ { "id_cobranca" : "abc123" }
+ retorno:
+ 201 - CREATED
+----
+
+```
+ CRIACAO E REGISTRO DE COBRANCA
+ POST /cobrancas/101/111/
+ // cadastra a cobranca com os dados informados e então registra.
+ {
+	dados da cobranca...
+ }
+ retorno:
+ 201 - CREATED
+```
+
+```
+ ALTERACAO DA COBRANCA
+ PUT /cobrancas/101/111/
+ { "id_cobranca" : "abc123", novos dados... }
+ // sao transmitidos apenas os dados de form. dados gerados no server nao sao alterados.
+ 200 - OK
+ 404 - NOT_FOUND
+```
+
+```
+ ALTERACAO DO STATUS DA COBRANCA
+ PATCH /cobrancas/101/111/
+ {
+	"id_cobranca" : "abc123",
+	"op" : "change_status",
+	"value" : "novo_status"
+ }
+ status possíveis: CHARGE_CANCELED
+ // operacao utilizada para cancelamento de cobranca
+ 200 - OK
+ 404 - NOT_FOUND
+```
+
+=== 201 - Book mensalidade
+
+Permite configurar definições gerais como valor e vencimento, para em seguida cadastrar destinatarios que receberão a cobrança
+
+=== 301 - Book mensalidade por uso
+
+Cobrança parte de um valor basico definido (como valor por hora, ou por dia) e para cada destinatario é possivel definir um multiplicados (por exemplo, valor base * 10)
+
+=== 401 - Book divisao de valor
+
+Permite dividir um valor entre os destinatarios cadastrados no book, gerando uma cobranca para cada um.
+
+== links de pagamento
+
+```
+GET /linkpagamento/
+{
+	"id_link" : "abc123"
+}
+```
+
+```
+PATCH /linkpagamento/
+{
+	"id_link" : "abc123"
+	"op" : "change_status"
+	"value" : "novo_status"
+}
+```
+
+=== Pagamento
+
+O registro de pagamento é feito pelo registro de um pagamento efetuado.
+O registro gera um documento na coleção 'pagamentos', e o `id_link` do documento é a chave para identificar o link de pagamento ao qual se refere.
+
+[plantuml,align="center"]
+----
+include::diagrams/pagamento_link.puml[]
+----
+
+```
+ REGISTRA PAGAMENTO DE LINK
+ PUT /linkspagamento/
+ // registra o pagamento de um link. Alem de todos os dados referentes ao pagamento, tem o id_link. desta forma, o server identifica o link que foi pago e consegue realizar os tratamentos necessarios
+ { "id_link" : "abc123", dados do pagamento... }
+ retorno:
+ 200 - CREATED
+```
+
+
+
