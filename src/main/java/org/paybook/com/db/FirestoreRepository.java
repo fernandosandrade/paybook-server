@@ -3,11 +3,10 @@ package org.paybook.com.db;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
-import io.quarkus.arc.DefaultBean;
 import lombok.SneakyThrows;
 import lombok.extern.jbosslog.JBossLog;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +17,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @JBossLog
-@ApplicationScoped
-@DefaultBean
+@Dependent
+//@DefaultBean
 public class FirestoreRepository implements IDocumentRepository {
 
     private CollectionReference cref;

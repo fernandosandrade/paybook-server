@@ -8,6 +8,7 @@ import com.google.firebase.cloud.FirestoreClient;
 import lombok.extern.jbosslog.JBossLog;
 import org.eclipse.microprofile.config.ConfigProvider;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -16,31 +17,37 @@ import java.io.IOException;
 @Singleton
 public class FirestoreService {
 
-    private final Firestore firestore;
+    private static final String APP_NAME = "plink";
 
-    public FirestoreService() {
+    private Firestore firestore;
+
+    @PostConstruct
+    public void init() throws IOException {
+        FirebaseApp plink;
         try {
-            initialize();
-        } catch (IOException e) {
-            log.error(e);
+            plink = FirebaseApp.getInstance(APP_NAME);
+        } catch (IllegalStateException e) {
+            // IllegalStateException – if the FirebaseApp was not initialized, either via
+            // initializeApp(FirebaseOptions, String) or getApps().
+            plink = initialize();
         }
-        this.firestore = FirestoreClient.getFirestore();
+        this.firestore = FirestoreClient.getFirestore(plink);
     }
 
     public Firestore get() {
         return this.firestore;
     }
 
-    private void initialize() throws IOException {
+    private FirebaseApp initialize() throws IOException {
         final String firebaseAdminJson = ConfigProvider.getConfig()
-                .getValue("firebase.adminsdk.jsonPath", String.class);
+                .getValue("firebase.adminsdk.jsonpath", String.class);
         try (FileInputStream inputStream = new FileInputStream(firebaseAdminJson)) {
-            FirebaseOptions options = new FirebaseOptions.Builder()
+            FirebaseOptions options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(inputStream))
                     .setDatabaseUrl("https://plink-2b309.firebaseio.com")
                     .build();
 
-            FirebaseApp.initializeApp(options);
+            return FirebaseApp.initializeApp(options, APP_NAME);
         }
     }
 }

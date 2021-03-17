@@ -3,12 +3,12 @@ package org.paybook.com.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+import lombok.Builder;
 import org.paybook.com.services.link_pagamento.EnumStatusLinkPagamento;
 
 import java.time.Instant;
 
-@Data
+@Builder
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class LinkPagamentoDto {

@@ -34,6 +34,8 @@ dependencies {
 
     testImplementation 'io.quarkus:quarkus-junit5'
     testImplementation 'io.rest-assured:rest-assured'
+    testImplementation group: 'io.quarkus', name: 'quarkus-junit5-mockito', version: '1.12.1.Final'
+
 }
 
 group 'paybook'
@@ -51,4 +53,25 @@ compileJava {
 
 compileTestJava {
     options.encoding = 'UTF-8'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java',
+                       'build/generated/sources/annotationProcessor/java/main']
+        }
+        resources {
+            srcDirs = ['src/main/resources']
+        }
+    }
+}
+
+sourceSets {
+    test {
+        java {
+            srcDirs = ['src/test/java',
+                       'build/generated/sources/annotationProcessor/java/test']
+        }
+    }
 }

@@ -39,7 +39,7 @@ public class DummyRepository implements IDocumentRepository {
                 .stream()
                 .filter(map -> map.containsKey(campo) && map.get(campo).equals(valor))
                 .findFirst()
-                .map(entry -> DBDocument.from(entry));
+                .map(entry -> DBDocument.from(entry, null));
     }
 
     @Override

@@ -1,5 +1,7 @@
 package org.paybook.com.services.link_pagamento;
 
+import org.paybook.com.services.link_pagamento.dao.LinkPagamentoModel;
+
 import javax.enterprise.context.ApplicationScoped;
 import java.util.List;
 import java.util.Optional;
@@ -11,23 +13,17 @@ import java.util.Optional;
 @ApplicationScoped
 public interface LinkPagamentoService {
 
-    /**
-     * Cadastra o link de pagamento.
-     *
-     * @param link
-     * @return
-     */
-    LinkPagamento add(LinkPagamento link);
+    LinkPagamentoModel add(LinkPagamentoModel linkPagamento);
 
-    LinkPagamento update(LinkPagamento link);
+    LinkPagamentoModel update(LinkPagamentoModel linkPagamento);
 
-    void delete(LinkPagamento link);
+    void delete(LinkPagamentoModel linkPagamento);
 
-    Optional<LinkPagamento> getById(String linkPagamentoID);
+    Optional<LinkPagamentoModel> getById(String idLinkPagamento);
 
-    List<LinkPagamento> getAllByCobranca(String cobrancaID);
+    List<LinkPagamentoModel> getAllByCobranca(String idCobranca);
 
-    void changeToPaid(LinkPagamento link);
+    void changeToPaid(LinkPagamentoModel linkPagamento);
 
-    void changeToCancelled(LinkPagamento link);
+    void changeToCancelled(LinkPagamentoModel linkPagamento);
 }

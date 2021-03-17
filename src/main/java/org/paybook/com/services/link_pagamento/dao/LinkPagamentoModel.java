@@ -8,7 +8,7 @@ import org.paybook.com.services.link_pagamento.EnumStatusLinkPagamento;
 
 import java.time.Instant;
 
-@JsonDeserialize(builder = ImmutableLinkPagamentoModel.Builder.class)
+@JsonDeserialize(builder = LinkPagamentoModel.Builder.class)
 @Value.Style(visibility = Value.Style.ImplementationVisibility.PACKAGE, overshadowImplementation = true)
 @Value.Immutable
 public interface LinkPagamentoModel extends DocumentRepositoryModel {
@@ -35,7 +35,7 @@ public interface LinkPagamentoModel extends DocumentRepositoryModel {
     String url();
 
     /** data em que esta cobranca passa a nao ser mais valida */
-    Instant expiration();
+    Instant vencimento();
 
     /** status do link de pagamento */
     EnumStatusLinkPagamento status();

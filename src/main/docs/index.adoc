@@ -20,7 +20,8 @@ Quando todos os links de uma cobrança são quitados, a cobrança é dada como '
 
 **Link de pagamento**: é o objeto por meio do qual a cobranca é paga.
 Toda cobrança possui ao menos um link de pagamento.
-Cada link de uma corança pode ser considerado uma *parcela* Quando o link é pago, a cobrança pode ser encerrar, no caso de cobrança única, ou não, no caso de cobrança parcelada em mais de um link ou cobrança recorrente, onde os links são gerados de forma periódica.
+Cada link de uma cobrança pode ser considerado uma *parcela*.
+Quando o link é pago, a cobrança pode ser encerrada - no caso de cobrança única - ou não - no caso de cobrança parcelada em mais de um link ou cobrança recorrente, onde os links são gerados de forma periódica.
 
 O caso de uso abaixo apresenta a criação de uma cobrança genérica no aplicativo.
 
@@ -38,10 +39,10 @@ Por exemplo: um book para cobrança das aulas particulares, outro book para a di
 
 === Cobrança e links de pagamento
 
-Toda cobrança possui 1 ou multiplos links de pagamento.
+Toda cobrança possui um ou multiplos links de pagamento.
 Links de pagamento são armazenados em uma coleção específica, chamada "links".
 O documento de link armazena as informações necessarios para gerar uma página de pagamento.
-Além disso, possui o id da cobrança pai e o id do destinatario.
+Além disso, possui o id da cobrança pai e o id do destinatário.
 
 [plantuml,align="center"]
 ----
@@ -53,6 +54,9 @@ Os links armazenam o valor de cada parcela do pagamento (no caso de multiplos li
 *vencimento*: na cobrança, diz respeito ao vencimento da mesma.
 No caso de uma cobrança com multiplas parcelas, cada link terá uma data de vencimento.
 No caso de cobranças periódicas, o vencimento se refere a frequência com que a cobrança gera links para pagamento, onde cada link possuirá uma data especifica de vencimento.
+*url*: é a url acessada para realizar o pagamento.
+A url é única, e sempre gerada em função dos dados do link de pagamento.
+Caso os atributos do link de pagamento sejam alterados, um nova url é gerada.
 
 [plantuml,align="center"]
 ----
@@ -73,7 +77,8 @@ include::diagrams/link_fluxoestados.puml[]
 Ao pagar o link, a cobranca ao qual ele pertence é notificada para tratar o pagamento.
 Caso a cobrança tenha apenas uma parcela, ela é quitada e encerrada.
 Caso possua mais de uma parcela, a quitação ocorre apenas quando todas são pagas.
-Em caso de cobranças recorrentes, a quitação fica restrita apenas a parcela, mantendo a cobrança como ATIVA. Para maiores detalhes a respeito do fluxo das cobranças, consultar cada tipo em específico.
+Em caso de cobranças recorrentes, a quitação fica restrita apenas a parcela, mantendo a cobrança como ATIVA.
+Para maiores detalhes a respeito do fluxo das cobranças, consultar cada tipo em específico.
 
 == Books e tipos de cobrança
 

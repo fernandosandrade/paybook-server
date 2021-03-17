@@ -9,6 +9,7 @@ import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import lombok.extern.jbosslog.JBossLog;
 import org.paybook.com.db.DocumentRepositoryModel;
+import org.paybook.com.dto.DtoObject;
 
 import java.util.Map;
 import java.util.Objects;
@@ -65,6 +66,15 @@ public class JsonWrapper {
                 .configure(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS, false)
                 .build()
                 .convertValue(documentModel, new TypeReference<Map<String, Object>>() {
+                });
+    }
+
+    public static <T extends DtoObject> Map<String, Object> fromObject(T dto) {
+        return JsonMapper.builder()
+                .addModule(new JavaTimeModule())
+                .configure(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS, false)
+                .build()
+                .convertValue(dto, new TypeReference<Map<String, Object>>() {
                 });
     }
 

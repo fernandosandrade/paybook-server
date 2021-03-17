@@ -8,7 +8,7 @@ entity "Cobranca" as cob {
   *destinatario : Destinatario
   *valor : decimal
   vencimento : timestamp
-  links : String[id_link...]
+  links : string[id_link...]
 }
 note right of cob::links
   lista com o id dos links
@@ -21,6 +21,7 @@ entity "LinkPagamento" as li {
     valor : decimal
     vencimento : timestamp
     status : StatusLinkPagamento
+    url : string
 }
 
 cob ||..|{ li

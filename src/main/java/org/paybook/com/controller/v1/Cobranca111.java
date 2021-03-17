@@ -1,9 +1,10 @@
 package org.paybook.com.controller.v1;
 
 import lombok.extern.jbosslog.JBossLog;
+import org.paybook.com.ExtendedResponseStatus;
+import org.paybook.com.dto.Cobranca111Dto;
 import org.paybook.com.services.cobranca.Cobranca111Service;
 import org.paybook.com.services.cobranca.dao.Cobranca111Model;
-import org.paybook.com.services.cobranca.dao.CobrancaRepository;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
@@ -16,13 +17,7 @@ import java.util.Optional;
  */
 @JBossLog
 @Path("/v1/cobranca/101/111")
-//@Consumes(MediaType.APPLICATION_JSON)
-//@Produces(MediaType.APPLICATION_JSON)
 public class Cobranca111 {
-
-    @Inject
-    //FirebaseCobrancaRepository cobrancaRepository;
-    CobrancaRepository cobrancaRepository;
 
     @Inject
     Cobranca111Service cobrancaService;
@@ -33,23 +28,27 @@ public class Cobranca111 {
      * @param idCobranca
      * @return
      */
-    @POST
+    @PUT
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response registro(@PathParam("id") String idCobranca) {
         Optional<Cobranca111Model> cobranca111Model = this.cobrancaService.obter(idCobranca);
         if (cobranca111Model.isEmpty()) {
             // cobranca nao encontrada
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .build();
-        } else {
-            var cobranca111ModelRegistrado = this.cobrancaService.registrar(cobranca111Model.get());
-            return Response.ok(cobranca111ModelRegistrado)
-                    .status(Response.Status.ACCEPTED)
+            return Response.status(Response.Status.NOT_FOUND)
                     .build();
         }
+        var cobranca111ModelRegistrado = this.cobrancaService.registrar(cobranca111Model.get());
+        return Response.ok(cobranca111ModelRegistrado)
+                .status(Response.Status.ACCEPTED)
+                .build();
+
     }
 
+    /**
+     * @param idCobranca
+     * @return
+     */
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -57,12 +56,68 @@ public class Cobranca111 {
         Optional<Cobranca111Model> cobrancaModel = this.cobrancaService.obter(idCobranca);
         if (cobrancaModel.isEmpty()) {
             // cobranca nao encontrada
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .build();
-        } else {
-            return Response.ok(cobrancaModel)
-                    .status(Response.Status.OK)
+            return Response.status(Response.Status.NOT_FOUND)
                     .build();
         }
+        return Response.ok(cobrancaModel)
+                .status(Response.Status.OK)
+                .build();
     }
+
+    /**
+     * Inclui uma nova cobrança, registrando ela em seguida.
+     *
+     * @param cobranca
+     * @return
+     */
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response incluir(Cobranca111Dto cobranca) {
+        Cobranca111Model novaCobranca = this.cobrancaService.novaCobranca(cobranca.getIdBook(),
+                cobranca.getValor(),
+                cobranca.getDataVencimento(),
+                cobranca.getDestinatario());
+        return Response.ok(novaCobranca)
+                .status(Response.Status.CREATED)
+                .build();
+    }
+
+    @PATCH
+    @Path("/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response alterarStatus(@PathParam("id") String idCobranca, Cobranca111Dto cobranca) {
+        Optional<Cobranca111Model> cobranca111Model = this.cobrancaService.obter(idCobranca);
+        if (cobranca111Model.isEmpty()) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .build();
+        }
+        if (cobranca.getStatus() == null) {
+            return Response.status(ExtendedResponseStatus.UNPROCESSABLE_ENTITY)
+                    .entity("required attributes: status=[CHARGE_PAID, CHARGE_CANCELED], received status=[null]")
+                    .build();
+        }
+        Cobranca111Model cobrancaModel = cobranca111Model.get();
+
+        switch (cobranca.getStatus()) {
+            case CHARGE_PAID:
+                this.cobrancaService.pagar(cobrancaModel);
+                break;
+            case CHARGE_CANCELED:
+                this.cobrancaService.cancelar(cobrancaModel);
+                break;
+            case CHARGE_OPEN:
+                return Response.status(ExtendedResponseStatus.UNPROCESSABLE_ENTITY)
+                        .entity("required attributes: status=[CHARGE_PAID, CHARGE_CANCELED], received status=[CHARGE_OPEN]")
+                        .build();
+            case WAITING_PAYMENT:
+                return Response.status(ExtendedResponseStatus.UNPROCESSABLE_ENTITY)
+                        .entity("required attributes: status=[CHARGE_PAID, CHARGE_CANCELED], received status=[WAITING_PAYMENT]")
+                        .build();
+        }
+        return Response.ok(cobranca)
+                .status(Response.Status.OK)
+                .build();
+    }
+
 }

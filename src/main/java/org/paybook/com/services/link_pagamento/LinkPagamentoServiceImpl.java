@@ -4,7 +4,7 @@ import lombok.extern.jbosslog.JBossLog;
 import org.paybook.com.exception.EntityType;
 import org.paybook.com.exception.ExceptionFactory;
 import org.paybook.com.exception.ExceptionType;
-import org.paybook.com.services.link_pagamento.dao.LinkPagamentoModel2;
+import org.paybook.com.services.link_pagamento.dao.LinkPagamentoModel;
 import org.paybook.com.services.link_pagamento.dao.LinkPagamentoRepository;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -21,43 +21,39 @@ public class LinkPagamentoServiceImpl implements LinkPagamentoService {
     LinkPagamentoRepository linkPagamentoRepository;
 
     @Override
-    public LinkPagamento add(LinkPagamento link) {
-        Optional<LinkPagamentoModel2> model = this.linkPagamentoRepository.getById(link.getId());
+    public LinkPagamentoModel add(LinkPagamentoModel linkPagamento) {
+        Optional<LinkPagamentoModel> model = this.linkPagamentoRepository.getById(linkPagamento.id());
         if (model.isPresent()) {
-            throw exception(EntityType.LINK_PAGAMENTO, ExceptionType.DUPLICATE_ENTITY, link.getId());
+            throw exception(EntityType.LINK_PAGAMENTO, ExceptionType.DUPLICATE_ENTITY, linkPagamento.id());
         }
-        this.linkPagamentoRepository.save(link.getModel());
-        return link;
+        return this.linkPagamentoRepository.add(linkPagamento);
     }
 
     @Override
-    public LinkPagamento update(LinkPagamento link) {
+    public LinkPagamentoModel update(LinkPagamentoModel linkPagamento) {
         return null;
     }
 
     @Override
-    public void delete(LinkPagamento link) {
-
+    public void delete(LinkPagamentoModel linkPagamento) {
     }
 
     @Override
-    public Optional<LinkPagamento> getById(String linkPagamentoID) {
+    public Optional<LinkPagamentoModel> getById(String idLinkPagamento) {
         return Optional.empty();
     }
 
     @Override
-    public List<LinkPagamento> getAllByCobranca(String cobrancaID) {
+    public List<LinkPagamentoModel> getAllByCobranca(String idCobranca) {
         return Collections.emptyList();
     }
 
     @Override
-    public void changeToPaid(LinkPagamento link) {
-
+    public void changeToPaid(LinkPagamentoModel linkPagamento) {
     }
 
     @Override
-    public void changeToCancelled(LinkPagamento link) {
-
+    public void changeToCancelled(LinkPagamentoModel linkPagamento) {
     }
 
     /**
