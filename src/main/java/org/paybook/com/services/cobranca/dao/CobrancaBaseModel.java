@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.paybook.com.db.DocumentRepositoryModel;
 import org.paybook.com.services.Destinatario;
 import org.paybook.com.services.cobranca.EnumStatusCobranca;
+import org.paybook.com.services.link_pagamento.dao.LinkPagamentoPreviewModel;
 
 import java.time.Instant;
 import java.util.List;
@@ -28,7 +29,7 @@ public interface CobrancaBaseModel extends DocumentRepositoryModel {
 
     EnumStatusCobranca status();
 
-    @JsonProperty("links_cobranca")
-    List<String> linksCobranca();
+    @JsonProperty("links_pagamento")
+    List<LinkPagamentoPreviewModel> linksPagamento();
 
 }

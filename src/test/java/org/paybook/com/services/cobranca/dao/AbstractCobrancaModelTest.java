@@ -7,6 +7,8 @@ import org.paybook.com.JsonWrapper;
 import org.paybook.com.services.Destinatario;
 import org.paybook.com.services.cobranca.CobrancaDocumentExample;
 import org.paybook.com.services.cobranca.EnumStatusCobranca;
+import org.paybook.com.services.link_pagamento.EnumStatusLinkPagamento;
+import org.paybook.com.services.link_pagamento.dao.LinkPagamentoPreviewModel;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -31,11 +33,11 @@ class AbstractCobrancaModelTest {
         assertEquals(data.get("data_criacao"), cobrancaModel.dataCriacao().toEpochMilli());
         assertEquals(EnumStatusCobranca.valueOf(data.get("status").toString()), cobrancaModel.status());
         assertEquals(data.get("atributo_teste"), cobrancaModel.atributoTeste());
-        assertEquals(data.get("links_cobranca"), cobrancaModel.linksCobranca());
+        assertEquals(data.get("links_pagamento"), cobrancaModel.linksPagamento());
     }
 
     @Test
-    void testModelserialize() throws JsonProcessingException {
+    void testModelSerialize() throws JsonProcessingException {
         final CobrancaTestModel cobrancaModel = new CobrancaTestModel.Builder()
                 .idCobranca("teste")
                 .idBook("teste")
@@ -43,7 +45,12 @@ class AbstractCobrancaModelTest {
                 .dataVencimento(Instant.now().truncatedTo(ChronoUnit.MILLIS))
                 .valor(10000)
                 .destinatario(new Destinatario("teste@teste.com.br", "fernando", "51999467985"))
-                .addLinksCobranca("link_01", "link_02")
+                .addLinksPagamento(LinkPagamentoPreviewModel.builder()
+                        .id("id_link_pagamento")
+                        .valor(1)
+                        .vencimento(Instant.now())
+                        .status(EnumStatusLinkPagamento.WAITING_PAIMENT)
+                        .build())
                 .status(EnumStatusCobranca.CHARGE_OPEN)
                 .atributoTeste("teste")
                 .build();
@@ -61,7 +68,7 @@ class AbstractCobrancaModelTest {
         assertEquals(cobrancaModel.destinatario().getTelefone(), ((Map) jsonMap.get("destinatario")).get("telefone"));
         assertEquals(cobrancaModel.status(), EnumStatusCobranca.valueOf(jsonMap.get("status").toString()));
         assertEquals(cobrancaModel.atributoTeste(), jsonMap.get("atributo_teste"));
-        assertEquals(cobrancaModel.linksCobranca(), jsonMap.get("links_cobranca"));
+        assertEquals(cobrancaModel.linksPagamento(), jsonMap.get("links_pagamento"));
     }
 
 

@@ -11,10 +11,10 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
-class LinkPagamentoModelTest {
+class LinkPagamentoPreviewModelTest {
 
     @Test
-    void popularFromMapTest() {
+    void testFromLinkPagamentoModel() {
         String id = "id_teste";
         String idCobranca = "id_cobranca_teste";
         Integer valorPrincipal = 100;
@@ -35,27 +35,13 @@ class LinkPagamentoModelTest {
                 "status", status);
         LinkPagamentoModel modelFromJson = JsonWrapper.toObject(jsonAsMap, LinkPagamentoModel.class);
 
-        LinkPagamentoModel modelFromNew = new LinkPagamentoModel.Builder()
-                .id(id)
-                .idCobranca(idCobranca)
-                .valorPrincipal(valorPrincipal)
-                .valorTaxas(valorTaxas)
-                .descricao(descricao)
-                .url(url)
-                .vencimento(vencimento)
-                .status(status)
-                .build();
 
-        assertEquals(modelFromNew.id(), modelFromJson.id());
-        assertEquals(modelFromNew.idCobranca(), modelFromJson.idCobranca());
-        assertEquals(modelFromNew.valorPrincipal(), modelFromJson.valorPrincipal());
-        assertEquals(modelFromNew.valorTaxas(), modelFromJson.valorTaxas());
-        assertEquals(modelFromNew.descricao(), modelFromJson.descricao());
-        assertEquals(modelFromNew.url(), modelFromJson.url());
-        assertEquals(modelFromNew.vencimento(), modelFromJson.vencimento());
-        assertEquals(modelFromNew.status(), modelFromJson.status());
+        LinkPagamentoPreviewModel linkPagamentoPreviewModel = LinkPagamentoPreviewModel.from(modelFromJson);
 
-        assertEquals(modelFromNew, modelFromJson);
+        assertEquals(id, linkPagamentoPreviewModel.id());
+        assertEquals(valorPrincipal, linkPagamentoPreviewModel.valor());
+        assertEquals(vencimento, linkPagamentoPreviewModel.vencimento());
+        assertEquals(status, linkPagamentoPreviewModel.status());
     }
 
 }

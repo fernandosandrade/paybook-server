@@ -6,8 +6,6 @@ import com.google.cloud.firestore.QueryDocumentSnapshot;
 import lombok.SneakyThrows;
 import lombok.extern.jbosslog.JBossLog;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -16,20 +14,19 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Implementa o acesso a uma <i>collection</i> do firestore
+ */
 @JBossLog
-@Dependent
-//@DefaultBean
-public class FirestoreRepository implements IDocumentRepository {
+class FirestoreCollection implements IDocumentRepository {
 
-    private CollectionReference cref;
+    private final FirestoreService firestoreService;
 
-    @Inject
-    FirestoreService firestoreService;
+    private final CollectionReference cref;
 
-    @Override
-    public FirestoreRepository collectionPath(String... path) {
-        this.cref = this.firestoreService.get().collection(String.join("/", path));
-        return this;
+    FirestoreCollection(FirestoreService firestoreService, CollectionReference cref) {
+        this.firestoreService = firestoreService;
+        this.cref = cref;
     }
 
     @Override
@@ -93,16 +90,4 @@ public class FirestoreRepository implements IDocumentRepository {
     public long deleteAll() {
         return 0;
     }
-
-    /*
-     * public void get() throws InterruptedException, ExecutionException { CollectionReference
-     * collectionReference = firestoreService .get() .collection(COBRANCAS_COLLECTION)
-     * .document("101") .collection("111");
-     *
-     * ApiFuture<QuerySnapshot> apiFuture = collectionReference// .whereEqualTo("tipo", "101") .get();
-     *
-     * List<QueryDocumentSnapshot> documents = apiFuture.get().getDocuments(); for (DocumentSnapshot
-     * document : documents) { LOGGER.info(document.getData()); } //return
-     * Response.ok(documents.get(0).getData()).build(); }
-     */
 }

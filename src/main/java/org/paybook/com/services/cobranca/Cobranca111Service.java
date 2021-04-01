@@ -1,5 +1,6 @@
 package org.paybook.com.services.cobranca;
 
+import io.smallrye.mutiny.Uni;
 import lombok.extern.jbosslog.JBossLog;
 import org.paybook.com.EnumTipoBook;
 import org.paybook.com.EnumTipoCobranca;
@@ -7,9 +8,11 @@ import org.paybook.com.RandomString;
 import org.paybook.com.services.Destinatario;
 import org.paybook.com.services.cobranca.dao.Cobranca111Model;
 import org.paybook.com.services.cobranca.dao.CobrancaRepository;
+import org.paybook.com.services.cobranca.dao.CobrancaRepositoryFactory;
 import org.paybook.com.services.link_pagamento.LinkPagamentoFactory;
-import org.paybook.com.services.link_pagamento.LinkPagamentoService;
 import org.paybook.com.services.link_pagamento.dao.LinkPagamentoModel;
+import org.paybook.com.services.link_pagamento.dao.LinkPagamentoPreviewModel;
+import org.paybook.com.services.link_pagamento.dao.LinkPagamentoRepositoryFactory;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -22,14 +25,16 @@ import java.util.Optional;
 public class Cobranca111Service {
 
     @Inject
-    CobrancaRepository cobrancaRepository;
+    CobrancaRepositoryFactory cobrancaRepositoryFactory;
 
     @Inject
-    LinkPagamentoService linkCobrancaService;
+    LinkPagamentoRepositoryFactory linkPagamentoRepositoryFactory;
+
+    CobrancaRepository cobrancaRepository;
 
     @PostConstruct
     public void init() {
-        this.cobrancaRepository.repositorio(EnumTipoBook.B_101, EnumTipoCobranca.C_111);
+        this.cobrancaRepository = this.cobrancaRepositoryFactory.from(EnumTipoBook.B_101, EnumTipoCobranca.C_111);
     }
 
     public Cobranca111Model novaCobranca(String idBook, Integer valor, Instant dataVencimento,
@@ -57,6 +62,11 @@ public class Cobranca111Service {
                 .map(dbDocument -> dbDocument.toObject(Cobranca111Model.class));
     }
 
+    public Uni<Optional<Cobranca111Model>> obterReactive(String idCobranca) {
+        return this.cobrancaRepository.getByIdReactive(idCobranca)
+                .map(opt -> opt.map(dbDocument -> dbDocument.toObject(Cobranca111Model.class)));
+    }
+
     public Cobranca111Model incluir(Cobranca111Model cobrancaModel) {
         return this.cobrancaRepository.add(cobrancaModel)
                 .toObject(Cobranca111Model.class);
@@ -72,21 +82,25 @@ public class Cobranca111Service {
      * @return
      */
     public Cobranca111Model registrar(Cobranca111Model cobrancaModel) {
-        if (cobrancaModel.status() == EnumStatusCobranca.CHARGE_OPEN) {
+        if (cobrancaModel.status() != EnumStatusCobranca.CHARGE_OPEN) {
+            log.errorf("tentativa de registro de cobranca invalido. id=%s status=%s",
+                    cobrancaModel.idCobranca(),
+                    cobrancaModel.status().name());
+        } else {
             LinkPagamentoModel linkPagamento = LinkPagamentoFactory.from(cobrancaModel.valor(),
                     cobrancaModel.dataVencimento(),
                     cobrancaModel.idCobranca(),
                     "descricao que vai acompanhar este link");
-            this.linkCobrancaService.add(linkPagamento);
+            LinkPagamentoPreviewModel linkPagamentoPreviewModel = LinkPagamentoPreviewModel.from(linkPagamento);
+
             Cobranca111Model cobrancaModelComLink = new Cobranca111Model.Builder()
                     .from(cobrancaModel)
-                    .addLinksCobranca(linkPagamento.id())
+                    .addLinksPagamento(linkPagamentoPreviewModel)
+                    .status(EnumStatusCobranca.WAITING_PAYMENT)
                     .build();
+
             this.cobrancaRepository.add(cobrancaModelComLink);
-        } else {
-            log.errorf("tentativa de registro de cobranca invalido. id=%s status=%s",
-                    cobrancaModel.idCobranca(),
-                    cobrancaModel.status().name());
+            this.linkPagamentoRepositoryFactory.from(cobrancaModelComLink).add(linkPagamento);
         }
         return cobrancaModel;
     }

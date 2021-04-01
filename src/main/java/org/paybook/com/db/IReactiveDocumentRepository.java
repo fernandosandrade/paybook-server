@@ -1,18 +1,20 @@
 package org.paybook.com.db;
 
+import io.smallrye.mutiny.Uni;
+
 import java.util.List;
 import java.util.Optional;
 
 /**
  * Interface comum a repositorios de documentos
  */
-public interface IDocumentRepository {
+public interface IReactiveDocumentRepository {
 
     DBDocument save(DBDocument document);
 
     List<DBDocument> saveAll(List<DBDocument> documents);
 
-    Optional<DBDocument> findFirst(String campo, Object valor);
+    Uni<Optional<DBDocument>> findFirst(String campo, Object valor);
 
     List<DBDocument> findAll(String campo, Object valor);
 

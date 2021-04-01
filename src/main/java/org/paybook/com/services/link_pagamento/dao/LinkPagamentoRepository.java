@@ -4,28 +4,45 @@ import lombok.extern.jbosslog.JBossLog;
 import org.paybook.com.JsonWrapper;
 import org.paybook.com.db.DBDocument;
 import org.paybook.com.db.IDocumentRepository;
+import org.paybook.com.db.RepositoryFactory;
+import org.paybook.com.services.cobranca.dao.CobrancaBaseModel;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
-import javax.inject.Named;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * Fornece acesso aos documentos de links de pagamento.
+ * <p>
+ * Deve ser sempre obtido por meio da factory {@link LinkPagamentoRepositoryFactory}.
+ * </p>
+ */
 @JBossLog
-@Named("linkPagamentoRepository")
-@ApplicationScoped
+@Dependent
 public class LinkPagamentoRepository {
 
-    static final String LINK_PAGAMENTO_COLLECTION = "link_pagamento";
+    static final String LINK_PAGAMENTO_COLLECTION = "links_pagamento";
 
     static final String CAMPO_ID_COBRANCA = "id_link";
 
-    private IDocumentRepository documentRepository;
-
     @Inject
-    public LinkPagamentoRepository(IDocumentRepository documentRepository) {
-        this.documentRepository = documentRepository;
-        this.documentRepository.collectionPath(LINK_PAGAMENTO_COLLECTION);
+    RepositoryFactory repositoryFactory;
+
+    IDocumentRepository documentRepository;
+
+    LinkPagamentoRepository rootRepository(CobrancaBaseModel cobranca) {
+        this.documentRepository =
+                this.repositoryFactory.collection(
+                        Objects.requireNonNull(cobranca.documentReference(),
+                                "cobranca passada nao possui referencia para um documento do repositorio.")
+                                .getPath() + LINK_PAGAMENTO_COLLECTION);
+        return this;
+    }
+
+    LinkPagamentoRepository rootRepository() {
+        this.documentRepository = this.repositoryFactory.collectionGroup(LINK_PAGAMENTO_COLLECTION);
+        return this;
     }
 
     public Optional<LinkPagamentoModel> getById(String idCobranca) {

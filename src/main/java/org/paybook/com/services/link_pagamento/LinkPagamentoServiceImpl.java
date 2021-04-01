@@ -49,11 +49,28 @@ public class LinkPagamentoServiceImpl implements LinkPagamentoService {
     }
 
     @Override
-    public void changeToPaid(LinkPagamentoModel linkPagamento) {
+    public void payLink(LinkPagamentoModel linkPagamento) {
+
     }
 
     @Override
-    public void changeToCancelled(LinkPagamentoModel linkPagamento) {
+    public void setLinkAsPaid(LinkPagamentoModel linkPagamento) {
+
+    }
+
+    @Override
+    public void cancelLink(LinkPagamentoModel linkPagamento) {
+
+    }
+
+    @Override
+    public void setLinkAsCanceled(LinkPagamentoModel linkPagamento) {
+
+    }
+
+    @Override
+    public void expireLink(LinkPagamentoModel linkPagamento) {
+
     }
 
     /**

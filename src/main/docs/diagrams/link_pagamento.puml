@@ -1,0 +1,14 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+actor usuario as usuario
+participant link_pagamento as link
+participant cobranca as cobranca
+
+usuario -> link : realiza o pagamento
+link -> link : processa
+link -> cobranca : notifica pagamento do link
+
+@enduml

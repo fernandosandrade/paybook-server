@@ -1,5 +1,6 @@
 package org.paybook.com.controller.v1;
 
+import io.smallrye.mutiny.Uni;
 import lombok.extern.jbosslog.JBossLog;
 import org.paybook.com.ExtendedResponseStatus;
 import org.paybook.com.dto.Cobranca111Dto;
@@ -62,6 +63,21 @@ public class Cobranca111 {
         return Response.ok(cobrancaModel)
                 .status(Response.Status.OK)
                 .build();
+    }
+
+    /**
+     * @param idCobranca
+     * @return
+     */
+    @GET
+    @Path("/reactive/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Uni<Response> obterReactive(@PathParam("id") String idCobranca) {
+        return this.cobrancaService.obterReactive(idCobranca)
+                .onItem().transform(optCobranca ->
+                        optCobranca.isPresent() ? Response.ok(optCobranca.get()) :
+                                Response.status(Response.Status.NOT_FOUND))
+                .onItem().transform(Response.ResponseBuilder::build);
     }
 
     /**

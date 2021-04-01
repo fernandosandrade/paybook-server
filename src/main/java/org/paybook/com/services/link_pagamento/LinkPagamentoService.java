@@ -21,9 +21,45 @@ public interface LinkPagamentoService {
 
     Optional<LinkPagamentoModel> getById(String idLinkPagamento);
 
+    /**
+     * Retorna todos os link de pagamento associados a uma cobrança.
+     *
+     * @param idCobranca id da cobranca pai dos links de pagamento
+     * @return lista contendo os links de pagamento
+     */
     List<LinkPagamentoModel> getAllByCobranca(String idCobranca);
 
-    void changeToPaid(LinkPagamentoModel linkPagamento);
+    /**
+     * Registra o pagamento da cobranca.
+     *
+     * @param linkPagamento
+     */
+    void payLink(LinkPagamentoModel linkPagamento);
 
-    void changeToCancelled(LinkPagamentoModel linkPagamento);
+    /**
+     * Seta o link como pago de forma manual.
+     *
+     * @param linkPagamento
+     */
+    void setLinkAsPaid(LinkPagamentoModel linkPagamento);
+
+    /**
+     * Cancela o link.
+     * <p>
+     * Deve ser utilizado quando o cancelamento se da de forma sistema e automatica, como por exemplo, o cancelamento da
+     * cobranca que gerou o link.
+     * </p>
+     *
+     * @param linkPagamento
+     */
+    void cancelLink(LinkPagamentoModel linkPagamento);
+
+    /**
+     * Cancela o link, mas com a origem do evento sendo
+     *
+     * @param linkPagamento
+     */
+    void setLinkAsCanceled(LinkPagamentoModel linkPagamento);
+
+    void expireLink(LinkPagamentoModel linkPagamento);
 }

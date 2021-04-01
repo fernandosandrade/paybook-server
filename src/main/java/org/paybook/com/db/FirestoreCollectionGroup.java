@@ -1,21 +1,24 @@
 package org.paybook.com.db;
 
-import java.util.ArrayList;
+import com.google.cloud.firestore.Query;
+import lombok.extern.jbosslog.JBossLog;
+
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
-//@RequestScoped
-//@IfBuildProfile("test")
-public class DummyRepository implements IDocumentRepository {
+/**
+ * IMplementa o acesso a um <i>collection group</i> do firestore
+ */
+@JBossLog
+class FirestoreCollectionGroup implements IDocumentRepository {
 
-    /**
-     * Map contendo um documento de cobranca, indexado por um id
-     */
-    public List<Map<String, Object>> dados = new ArrayList();
+    private final FirestoreService firestoreService;
 
-    public void addDados(Map<String, Object> dados) {
-        this.dados.add(dados);
+    private final Query query;
+
+    FirestoreCollectionGroup(FirestoreService firestoreService, Query query) {
+        this.firestoreService = firestoreService;
+        this.query = query;
     }
 
     @Override
@@ -30,11 +33,7 @@ public class DummyRepository implements IDocumentRepository {
 
     @Override
     public Optional<DBDocument> findFirst(String campo, Object valor) {
-        return this.dados
-                .stream()
-                .filter(map -> map.containsKey(campo) && map.get(campo).equals(valor))
-                .findFirst()
-                .map(entry -> DBDocument.from(entry, null));
+        return Optional.empty();
     }
 
     @Override

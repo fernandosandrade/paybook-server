@@ -13,6 +13,7 @@ import java.time.Instant;
 class LinkPagamentoRepositoryTest {
 
     private static final String ID_LINK = "teste";
+
     @Inject
     LinkPagamentoRepository linkPagamentoRepository;
 

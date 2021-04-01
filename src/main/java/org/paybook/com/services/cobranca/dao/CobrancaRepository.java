@@ -1,38 +1,51 @@
 package org.paybook.com.services.cobranca.dao;
 
+import io.smallrye.mutiny.Uni;
 import org.paybook.com.EnumTipoBook;
 import org.paybook.com.EnumTipoCobranca;
 import org.paybook.com.JsonWrapper;
 import org.paybook.com.db.DBDocument;
 import org.paybook.com.db.IDocumentRepository;
+import org.paybook.com.db.IReactiveDocumentRepository;
+import org.paybook.com.db.RepositoryFactory;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import java.util.Objects;
 import java.util.Optional;
 
-@ApplicationScoped
+//@ApplicationScoped
+@Dependent
 public class CobrancaRepository {
 
     static final String COBRANCAS_COLLECTION = "cobrancas";
 
     static final String CAMPO_ID_COBRANCA = "id_cobranca";
 
+    @Inject
+    RepositoryFactory repositoryFactory;
+
     private IDocumentRepository documentRepository;
 
-    @Inject
-    public CobrancaRepository(IDocumentRepository documentRepository) {
-        this.documentRepository = documentRepository;
-    }
+    private IReactiveDocumentRepository reactiveDocumentRepository;
 
-    public CobrancaRepository repositorio(EnumTipoBook book, EnumTipoCobranca cobranca) {
-        this.documentRepository.collectionPath(COBRANCAS_COLLECTION, book.getValorAsString(),
+    CobrancaRepository repositorio(EnumTipoBook book, EnumTipoCobranca cobranca) {
+        this.documentRepository = this.repositoryFactory.collection(COBRANCAS_COLLECTION,
+                book.getValorAsString(),
+                cobranca.getValorAsString());
+
+        this.reactiveDocumentRepository = this.repositoryFactory.reactiveCollection(COBRANCAS_COLLECTION,
+                book.getValorAsString(),
                 cobranca.getValorAsString());
         return this;
     }
 
     public Optional<DBDocument> getById(String idCobranca) {
         return this.documentRepository.findFirst(CAMPO_ID_COBRANCA, idCobranca);
+    }
+
+    public Uni<Optional<DBDocument>> getByIdReactive(String idCobranca) {
+        return this.reactiveDocumentRepository.findFirst(CAMPO_ID_COBRANCA, idCobranca);
     }
 
     /**
