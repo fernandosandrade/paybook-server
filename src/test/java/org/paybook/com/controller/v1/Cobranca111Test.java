@@ -6,8 +6,7 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.paybook.com.dto.Cobranca111Dto;
+import org.paybook.com.controller.dto.Cobranca111Dto;
 import org.paybook.com.services.Destinatario;
 import org.paybook.com.services.cobranca.Cobranca111Service;
 import org.paybook.com.services.cobranca.EnumStatusCobranca;
@@ -15,7 +14,6 @@ import org.paybook.com.services.cobranca.dao.Cobranca111Model;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Optional;
 
 import static io.restassured.RestAssured.given;
 
@@ -37,7 +35,7 @@ class Cobranca111Test {
                 .valor(100)
                 .build();
 
-        Mockito.when(this.cobrancaService.obter("teste")).thenReturn(Optional.of(cobranca111Model));
+//        Mockito.when(this.cobrancaService.obter("teste")).thenReturn(Optional.of(cobranca111Model));
         Response response = given()
                 .when().get("/v1/cobranca/101/111/teste");
 

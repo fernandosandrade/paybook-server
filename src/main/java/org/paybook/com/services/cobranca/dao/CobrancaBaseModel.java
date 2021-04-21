@@ -11,8 +11,8 @@ import java.util.List;
 
 public interface CobrancaBaseModel extends DocumentRepositoryModel {
 
-    @JsonProperty("id_cobranca")
-    String idCobranca();
+//    @JsonProperty("id_cobranca")
+//    String idCobranca();
 
     @JsonProperty("id_book")
     String idBook();

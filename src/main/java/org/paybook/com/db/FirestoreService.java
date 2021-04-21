@@ -50,4 +50,5 @@ public class FirestoreService {
             return FirebaseApp.initializeApp(options, APP_NAME);
         }
     }
+
 }

@@ -15,20 +15,26 @@ public class RepositoryFactory {
     @Inject
     FirestoreService firestoreService;
 
-    public IDocumentRepository collection(String... path) {
-        return new FirestoreCollection(this.firestoreService,
-                this.firestoreService.get().collection(String.join("/", path)));
+    /**
+     * Retorna acesso a coleção de documentos existente no path passado.
+     *
+     * @param
+     * @return
+     */
+    public IDocumentRepository collection(CollectionPath collectionPath) {
+        return FirestoreCollection.of(this.firestoreService,
+                this.firestoreService.get().collection(collectionPath.getPath()));
     }
 
-    public IDocumentRepository collectionGroup(String groupName) {
-        return new FirestoreCollectionGroup(this.firestoreService,
-                this.firestoreService.get().collectionGroup(groupName));
+    /**
+     * Retorna acesso a uma collection group.
+     *
+     * @param collectionGroupName nome da collection group
+     * @return
+     */
+    public IDocumentRepository collectionGroup(String collectionGroupName) {
+        return FirestoreCollectionGroup.of(this.firestoreService, collectionGroupName);
+//                this.firestoreService.get().collectionGroup(groupName));
     }
-
-    public IReactiveDocumentRepository reactiveCollection(String... path) {
-        return new FirestoreCollectionReactive(this.firestoreService,
-                this.firestoreService.get().collection(String.join("/", path)));
-    }
-
 
 }

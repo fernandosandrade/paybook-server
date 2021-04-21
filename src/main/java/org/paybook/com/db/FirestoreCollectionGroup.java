@@ -1,6 +1,7 @@
 package org.paybook.com.db;
 
-import com.google.cloud.firestore.Query;
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
 import lombok.extern.jbosslog.JBossLog;
 
 import java.util.List;
@@ -14,50 +15,54 @@ class FirestoreCollectionGroup implements IDocumentRepository {
 
     private final FirestoreService firestoreService;
 
-    private final Query query;
+    private final String collectionGroup;
 
-    FirestoreCollectionGroup(FirestoreService firestoreService, Query query) {
+    private FirestoreCollectionGroup(FirestoreService firestoreService, String collectionGroup) {
         this.firestoreService = firestoreService;
-        this.query = query;
+        this.collectionGroup = collectionGroup;
+    }
+
+    static IDocumentRepository of(FirestoreService firestoreService, String collectionGroup) {
+        return new FirestoreCollectionGroup(firestoreService, collectionGroup);
     }
 
     @Override
-    public DBDocument save(DBDocument document) {
+    public Uni<DBDocument> save(DBDocument document) {
         return null;
     }
 
     @Override
-    public List<DBDocument> saveAll(List<DBDocument> documents) {
+    public Multi<DBDocument> saveAll(List<DBDocument> documents) {
         return null;
     }
 
     @Override
-    public Optional<DBDocument> findFirst(String campo, Object valor) {
-        return Optional.empty();
+    public Uni<Optional<DBDocument>> findFirst(String campo, Object valor) {
+        return Uni.createFrom().item(Optional.empty());
     }
 
     @Override
-    public List<DBDocument> findAll(String campo, Object valor) {
+    public Multi<DBDocument> findAll(String campo, Object valor) {
         return null;
     }
 
     @Override
-    public long count() {
-        return 0;
+    public Uni<Long> count() {
+        return Uni.createFrom().item(0L);
     }
 
     @Override
-    public long count(String campo, Object valor) {
-        return 0;
+    public Uni<Long> count(String campo, Object valor) {
+        return Uni.createFrom().item(0L);
     }
 
     @Override
-    public long delete(String idCobranca) {
-        return 0;
+    public Uni<Boolean> delete(String idCobranca) {
+        return Uni.createFrom().item(false);
     }
 
     @Override
-    public long deleteAll() {
-        return 0;
+    public Uni<Long> deleteAll() {
+        return Uni.createFrom().item(0L);
     }
 }

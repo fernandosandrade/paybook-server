@@ -1,12 +1,13 @@
 package org.paybook.com.services.cobranca.dao;
 
 import io.smallrye.mutiny.Uni;
+import lombok.extern.jbosslog.JBossLog;
 import org.paybook.com.EnumTipoBook;
 import org.paybook.com.EnumTipoCobranca;
 import org.paybook.com.JsonWrapper;
+import org.paybook.com.db.CollectionPath;
 import org.paybook.com.db.DBDocument;
 import org.paybook.com.db.IDocumentRepository;
-import org.paybook.com.db.IReactiveDocumentRepository;
 import org.paybook.com.db.RepositoryFactory;
 
 import javax.enterprise.context.Dependent;
@@ -14,7 +15,7 @@ import javax.inject.Inject;
 import java.util.Objects;
 import java.util.Optional;
 
-//@ApplicationScoped
+@JBossLog
 @Dependent
 public class CobrancaRepository {
 
@@ -27,25 +28,23 @@ public class CobrancaRepository {
 
     private IDocumentRepository documentRepository;
 
-    private IReactiveDocumentRepository reactiveDocumentRepository;
+    private CollectionPath collectionPath;
 
-    CobrancaRepository repositorio(EnumTipoBook book, EnumTipoCobranca cobranca) {
-        this.documentRepository = this.repositoryFactory.collection(COBRANCAS_COLLECTION,
+    CobrancaRepository setRepository(EnumTipoBook book, EnumTipoCobranca cobranca) {
+        this.collectionPath = CollectionPath.of(COBRANCAS_COLLECTION,
                 book.getValorAsString(),
                 cobranca.getValorAsString());
-
-        this.reactiveDocumentRepository = this.repositoryFactory.reactiveCollection(COBRANCAS_COLLECTION,
-                book.getValorAsString(),
-                cobranca.getValorAsString());
+        log.infof("new cobranca repository for [%s]", this.collectionPath.getPath());
+        this.documentRepository = this.repositoryFactory.collection(this.collectionPath);
         return this;
     }
 
-    public Optional<DBDocument> getById(String idCobranca) {
+    public Uni<Optional<DBDocument>> getById(String idCobranca) {
         return this.documentRepository.findFirst(CAMPO_ID_COBRANCA, idCobranca);
     }
 
     public Uni<Optional<DBDocument>> getByIdReactive(String idCobranca) {
-        return this.reactiveDocumentRepository.findFirst(CAMPO_ID_COBRANCA, idCobranca);
+        return this.documentRepository.findFirst(CAMPO_ID_COBRANCA, idCobranca);
     }
 
     /**
@@ -53,13 +52,11 @@ public class CobrancaRepository {
      * @param cobrancaModel
      * @return
      */
-    public <T extends CobrancaBaseModel> DBDocument add(T cobrancaModel) {
-        if (cobrancaModel.documentReference() != null) {
-            throw new IllegalArgumentException(
-                    "apenas documentos sem referencia podem ser adicionados. utilize a operacao de 'update' para " +
-                            "atualizar um documento ja existente");
-        }
-        DBDocument dbDocument = DBDocument.from(JsonWrapper.fromObject(cobrancaModel), null);
+    public <T extends CobrancaBaseModel> Uni<DBDocument> add(T cobrancaModel) {
+        DBDocument dbDocument = DBDocument.from(
+                JsonWrapper.fromObject(cobrancaModel),
+                this.collectionPath,
+                cobrancaModel.documentID());
         return this.documentRepository.save(dbDocument);
     }
 
@@ -69,11 +66,13 @@ public class CobrancaRepository {
      * @param cobrancaModel
      * @param <T>
      */
-    public <T extends CobrancaBaseModel> void update(T cobrancaModel) {
-        Objects.requireNonNull(cobrancaModel.documentReference(), "referencia do documento nao pode ser nula");
-        DBDocument dbDocument = DBDocument.from(JsonWrapper.fromObject(cobrancaModel),
-                cobrancaModel.documentReference());
-        this.documentRepository.save(dbDocument);
+    public <T extends CobrancaBaseModel> Uni<DBDocument> update(T cobrancaModel) {
+        Objects.requireNonNull(cobrancaModel.documentID(), "referencia do documento nao pode ser nula");
+        DBDocument dbDocument = DBDocument.from(
+                JsonWrapper.fromObject(cobrancaModel),
+                this.collectionPath,
+                cobrancaModel.documentID());
+        return this.documentRepository.save(dbDocument);
     }
 
 }

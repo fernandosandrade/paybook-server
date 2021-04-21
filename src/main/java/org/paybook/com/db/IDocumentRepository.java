@@ -1,5 +1,8 @@
 package org.paybook.com.db;
 
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -8,21 +11,29 @@ import java.util.Optional;
  */
 public interface IDocumentRepository {
 
-    DBDocument save(DBDocument document);
+    /**
+     * Save the document on repository.
+     * <p>
+     * If document does not exists, it will be created. If already exists, will be merged with informed document.
+     * </p>
+     *
+     * @param document
+     * @return
+     */
+    Uni<DBDocument> save(DBDocument document);
 
-    List<DBDocument> saveAll(List<DBDocument> documents);
+    Multi<DBDocument> saveAll(List<DBDocument> documents);
 
-    Optional<DBDocument> findFirst(String campo, Object valor);
+    Uni<Optional<DBDocument>> findFirst(String campo, Object valor);
 
-    List<DBDocument> findAll(String campo, Object valor);
+    Multi<DBDocument> findAll(String campo, Object valor);
 
-    long count();
+    Uni<Long> count();
 
-    long count(String campo, Object valor);
+    Uni<Long> count(String campo, Object valor);
 
-    long delete(String idCobranca);
+    Uni<Boolean> delete(String idCobranca);
 
-    long deleteAll();
-
+    Uni<Long> deleteAll();
 
 }

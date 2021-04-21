@@ -16,7 +16,7 @@ public class CobrancaRepositoryFactory {
     public CobrancaRepository from(EnumTipoBook book, EnumTipoCobranca cobranca) {
         return this.cobrancaProvider
                 .get()
-                .repositorio(book, cobranca);
+                .setRepository(book, cobranca);
     }
 
 }

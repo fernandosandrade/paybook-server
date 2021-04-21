@@ -1,22 +1,28 @@
 package org.paybook.com.services.link_pagamento.dao;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.experimental.Accessors;
+import lombok.ToString;
 import lombok.extern.jackson.Jacksonized;
+import org.paybook.com.db.RepositoryMap;
 import org.paybook.com.services.link_pagamento.EnumStatusLinkPagamento;
 
 import java.time.Instant;
 
 /**
- * Classe que define um preview do link de pagamento, mostrando apenas algumas informações
+ * Classe que define um preview do link de pagamento, mostrando apenas algumas informações.
  */
 @Getter
-@Accessors(fluent = true)
+@EqualsAndHashCode
+@ToString
 @Builder
 @Jacksonized
-public class LinkPagamentoPreviewModel {
+public class LinkPagamentoPreviewModel implements RepositoryMap {
 
+    /**
+     * link ID originator.
+     */
     private String id;
 
     private Integer valor;
@@ -27,7 +33,7 @@ public class LinkPagamentoPreviewModel {
 
     public static LinkPagamentoPreviewModel from(LinkPagamentoModel linkPagamentoModel) {
         return LinkPagamentoPreviewModel.builder()
-                .id(linkPagamentoModel.id())
+                .id(linkPagamentoModel.documentID())
                 .valor(linkPagamentoModel.valorPrincipal())
                 .vencimento(linkPagamentoModel.vencimento())
                 .status(linkPagamentoModel.status())

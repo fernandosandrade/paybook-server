@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.immutables.value.Value;
 
-@JsonDeserialize(builder = ImmutableCobrancaTestModel.Builder.class)
+@JsonDeserialize(builder = CobrancaTestModel.Builder.class)
 @Value.Style(visibility = Value.Style.ImplementationVisibility.PACKAGE, overshadowImplementation = true)
 @Value.Immutable
 public interface CobrancaTestModel extends CobrancaBaseModel {

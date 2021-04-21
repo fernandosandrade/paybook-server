@@ -1,8 +1,8 @@
 package org.paybook.com.services.cobranca;
 
 import lombok.Value;
-import org.paybook.com.RandomString;
 import org.paybook.com.services.Destinatario;
+import org.paybook.com.utils.RandomString;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;

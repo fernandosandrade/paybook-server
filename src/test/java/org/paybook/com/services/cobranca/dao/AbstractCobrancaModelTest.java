@@ -12,6 +12,7 @@ import org.paybook.com.services.link_pagamento.dao.LinkPagamentoPreviewModel;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -68,7 +69,10 @@ class AbstractCobrancaModelTest {
         assertEquals(cobrancaModel.destinatario().getTelefone(), ((Map) jsonMap.get("destinatario")).get("telefone"));
         assertEquals(cobrancaModel.status(), EnumStatusCobranca.valueOf(jsonMap.get("status").toString()));
         assertEquals(cobrancaModel.atributoTeste(), jsonMap.get("atributo_teste"));
-        assertEquals(cobrancaModel.linksPagamento(), jsonMap.get("links_pagamento"));
+        LinkPagamentoPreviewModel linkPagamentoPreviewModel = cobrancaModel.linksPagamento().get(0);
+        assertEquals(cobrancaModel.linksPagamento().get(0),
+                JsonWrapper.toObject((Map<String, Object>) ((ArrayList) jsonMap.get("links_pagamento")).get(0),
+                        LinkPagamentoPreviewModel.class));
     }
 
 

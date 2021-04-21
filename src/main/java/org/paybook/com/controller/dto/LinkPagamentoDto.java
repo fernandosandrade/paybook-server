@@ -1,4 +1,4 @@
-package org.paybook.com.dto;
+package org.paybook.com.controller.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;

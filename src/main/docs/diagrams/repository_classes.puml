@@ -1,0 +1,52 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+interface IDocumentRepository {
++Uni<DBDocument> save(DBDocument document);
++Uni<List<DBDocument>> saveAll(List<DBDocument> documents);
++Uni<Optional<DBDocument>> findFirst(String campo, Object valor);
+{method}...
+}
+
+class FirestoreCollection {
+-final FirestoreService firestoreService
+-final FirestoreOperations firestoreOperations
+-final CollectionReference cref
+~FirestoreCollection(firestoreService,firestoreOperations,cref)
+}
+
+class FirestoreCollectionGroup {
+-final FirestoreService firestoreService
+-final FirestoreOperations firestoreOperations
+-final CollectionReference cref
+~FirestoreCollectionGroup(firestoreService,firestoreOperations,cref)
+}
+
+class FirestoreOperations {
++List<DBDocument> getDocuments(Query query)
+{method}...
+}
+class FirestoreService {
+-init()
++Firestore get()
+}
+
+class RepositoryFactory {
++IDocumentRepository collection(String... path)
++IDocumentRepository collectionGroup(String groupName)
+}
+
+class DBDocument {
+-Map<String, Object> data;
++<T> T toObject(Class<T> classeCobranca)
+}
+
+IDocumentRepository <|-- FirestoreCollection
+IDocumentRepository <|-- FirestoreCollectionGroup
+
+RepositoryFactory *-- FirestoreOperations
+RepositoryFactory *-- FirestoreService
+
+RepositoryFactory -- IDocumentRepository
+
+@enduml

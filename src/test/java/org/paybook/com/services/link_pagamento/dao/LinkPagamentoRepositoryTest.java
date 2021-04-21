@@ -48,7 +48,7 @@ class LinkPagamentoRepositoryTest {
     @Test
     void deleteLinkTest() {
         LinkPagamentoModel model = newLinkPagamentoModel();
-        LinkPagamentoModel modelPersistido = this.linkPagamentoRepository.add(model);
+        LinkPagamentoModel modelPersistido = this.linkPagamentoRepository.add(model).await().indefinitely();
         //assertNotNull(modelPersistido.getDocumentReference());
     }
 

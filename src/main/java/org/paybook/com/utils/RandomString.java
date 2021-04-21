@@ -1,4 +1,4 @@
-package org.paybook.com;
+package org.paybook.com.utils;
 
 import java.security.SecureRandom;
 import java.util.Locale;
@@ -15,9 +15,9 @@ public class RandomString {
 
     private static final SecureRandom RANDOM = new SecureRandom();
 
-    /** randomid de 16 posicoes */
+    /** randomid de 20 posicoes */
     public static String next() {
-        return next(16);
+        return next(20);
     }
 
     public static String next(int count) {

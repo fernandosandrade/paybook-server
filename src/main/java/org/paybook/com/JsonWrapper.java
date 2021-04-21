@@ -5,46 +5,19 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import lombok.extern.jbosslog.JBossLog;
+import org.paybook.com.controller.dto.DtoObject;
 import org.paybook.com.db.DocumentRepositoryModel;
-import org.paybook.com.dto.DtoObject;
+import org.paybook.com.db.RepositoryMap;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 @JBossLog
 public class JsonWrapper {
 
     private JsonWrapper() {
-    }
-
-    /**
-     * Converte o DocumentReference passado em uma instancia de clazz, populando os atributos e o DocumentReference
-     *
-     * @param firestoreDoc documento do firestore
-     * @param clazz        classe que extende {@link DocumentRepositoryModel}
-     * @param <T>
-     * @return
-     */
-    public static <T extends DocumentRepositoryModel> T fromFirestoreToObject(DocumentReference firestoreDoc,
-                                                                              Class<T> clazz) {
-        try {
-            T firestoreModel = toObject(firestoreDoc.get()
-                    .get()
-                    .getData(), clazz);
-            //firestoreModel.setDocumentReference(firestoreDoc);
-            return firestoreModel;
-        } catch (InterruptedException e) {
-            Thread.currentThread()
-                    .interrupt();
-            log.error(e);
-        } catch (ExecutionException e) {
-            log.error(e);
-        }
-        return null;
     }
 
     public static <T> T toObject(DocumentSnapshot firestoreDoc, Class<T> clazz) {
@@ -77,5 +50,15 @@ public class JsonWrapper {
                 .convertValue(dto, new TypeReference<Map<String, Object>>() {
                 });
     }
+
+    public static <T extends RepositoryMap> Map<String, Object> fromObject(T map) {
+        return JsonMapper.builder()
+                .addModule(new JavaTimeModule())
+                .configure(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS, false)
+                .build()
+                .convertValue(map, new TypeReference<Map<String, Object>>() {
+                });
+    }
+
 
 }

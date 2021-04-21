@@ -2,12 +2,15 @@ package org.paybook.com.controller.v1;
 
 import io.smallrye.mutiny.Uni;
 import lombok.extern.jbosslog.JBossLog;
-import org.paybook.com.ExtendedResponseStatus;
-import org.paybook.com.dto.Cobranca111Dto;
+import org.paybook.com.ValidationGroups;
+import org.paybook.com.controller.dto.Cobranca111Dto;
 import org.paybook.com.services.cobranca.Cobranca111Service;
 import org.paybook.com.services.cobranca.dao.Cobranca111Model;
+import org.paybook.com.utils.ExtendedResponseStatus;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
+import javax.validation.groups.ConvertGroup;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -24,86 +27,56 @@ public class Cobranca111 {
     Cobranca111Service cobrancaService;
 
     /**
-     * Registra a cobranca.
-     *
-     * @param idCobranca
-     * @return
-     */
-    @PUT
-    @Path("/{id}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response registro(@PathParam("id") String idCobranca) {
-        Optional<Cobranca111Model> cobranca111Model = this.cobrancaService.obter(idCobranca);
-        if (cobranca111Model.isEmpty()) {
-            // cobranca nao encontrada
-            return Response.status(Response.Status.NOT_FOUND)
-                    .build();
-        }
-        var cobranca111ModelRegistrado = this.cobrancaService.registrar(cobranca111Model.get());
-        return Response.ok(cobranca111ModelRegistrado)
-                .status(Response.Status.ACCEPTED)
-                .build();
-
-    }
-
-    /**
      * @param idCobranca
      * @return
      */
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response obter(@PathParam("id") String idCobranca) {
-        Optional<Cobranca111Model> cobrancaModel = this.cobrancaService.obter(idCobranca);
-        if (cobrancaModel.isEmpty()) {
-            // cobranca nao encontrada
-            return Response.status(Response.Status.NOT_FOUND)
-                    .build();
-        }
-        return Response.ok(cobrancaModel)
-                .status(Response.Status.OK)
-                .build();
-    }
-
-    /**
-     * @param idCobranca
-     * @return
-     */
-    @GET
-    @Path("/reactive/{id}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Uni<Response> obterReactive(@PathParam("id") String idCobranca) {
-        return this.cobrancaService.obterReactive(idCobranca)
+    public Uni<Response> obter(@PathParam("id") String idCobranca) {
+        return this.cobrancaService.find(idCobranca)
                 .onItem().transform(optCobranca ->
-                        optCobranca.isPresent() ? Response.ok(optCobranca.get()) :
+                        optCobranca.isPresent() ?
+                                Response.ok(optCobranca.get()) :
                                 Response.status(Response.Status.NOT_FOUND))
                 .onItem().transform(Response.ResponseBuilder::build);
     }
 
     /**
-     * Inclui uma nova cobrança, registrando ela em seguida.
+     * {@code POST  /cobranca/101/111} : create a new cobrança.
+     * <p>
+     * Creates a new cobrança.
+     * </p>
      *
-     * @param cobranca
-     * @return
+     * @param cobranca cobranca to be created.
+     * @return the {@link Response} with status {@code 200 (CREATED)} and new cobrança in the body.
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response incluir(Cobranca111Dto cobranca) {
-        Cobranca111Model novaCobranca = this.cobrancaService.novaCobranca(cobranca.getIdBook(),
+    public Uni<Response> create(@Valid @ConvertGroup(to = ValidationGroups.Post.class) Cobranca111Dto cobranca) {
+        return this.cobrancaService.create(cobranca.getIdBook(),
                 cobranca.getValor(),
                 cobranca.getDataVencimento(),
-                cobranca.getDestinatario());
-        return Response.ok(novaCobranca)
-                .status(Response.Status.CREATED)
-                .build();
+                cobranca.getDestinatario(),
+                cobranca.getDescricao())
+                .onItem().transform(cobranca111Model -> Response.ok(cobranca111Model)
+                        .status(Response.Status.CREATED)
+                        .build());
+    }
+
+    @PUT
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Uni<Response> update(Cobranca111Dto cobrancaDto) {
+        return Uni.createFrom().item(Response.noContent().build());
     }
 
     @PATCH
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response alterarStatus(@PathParam("id") String idCobranca, Cobranca111Dto cobranca) {
-        Optional<Cobranca111Model> cobranca111Model = this.cobrancaService.obter(idCobranca);
+        Optional<Cobranca111Model> cobranca111Model = this.cobrancaService.find(idCobranca).await().indefinitely();
         if (cobranca111Model.isEmpty()) {
             return Response.status(Response.Status.NOT_FOUND)
                     .build();
@@ -133,6 +106,19 @@ public class Cobranca111 {
         }
         return Response.ok(cobranca)
                 .status(Response.Status.OK)
+                .build();
+    }
+
+    public Response registro(@PathParam("id") String idCobranca) {
+        Optional<Cobranca111Model> cobranca111Model = this.cobrancaService.find(idCobranca).await().indefinitely();
+        if (cobranca111Model.isEmpty()) {
+            // cobranca nao encontrada
+            return Response.status(Response.Status.NOT_FOUND)
+                    .build();
+        }
+        var cobranca111ModelRegistrado = this.cobrancaService.registrar(cobranca111Model.get());
+        return Response.ok(cobranca111ModelRegistrado)
+                .status(Response.Status.ACCEPTED)
                 .build();
     }
 

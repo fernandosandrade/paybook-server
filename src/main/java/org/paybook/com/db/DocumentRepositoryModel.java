@@ -1,7 +1,6 @@
 package org.paybook.com.db;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.cloud.firestore.DocumentReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.annotation.Nullable;
 
@@ -10,8 +9,8 @@ import javax.annotation.Nullable;
  */
 public interface DocumentRepositoryModel {
 
-    @JsonIgnore
+    @JsonProperty(value = "document_id", access = JsonProperty.Access.WRITE_ONLY)
     @Nullable
-    DocumentReference documentReference();
+    String documentID();
 
 }

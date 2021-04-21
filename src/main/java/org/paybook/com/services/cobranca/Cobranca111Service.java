@@ -4,7 +4,6 @@ import io.smallrye.mutiny.Uni;
 import lombok.extern.jbosslog.JBossLog;
 import org.paybook.com.EnumTipoBook;
 import org.paybook.com.EnumTipoCobranca;
-import org.paybook.com.RandomString;
 import org.paybook.com.services.Destinatario;
 import org.paybook.com.services.cobranca.dao.Cobranca111Model;
 import org.paybook.com.services.cobranca.dao.CobrancaRepository;
@@ -13,6 +12,7 @@ import org.paybook.com.services.link_pagamento.LinkPagamentoFactory;
 import org.paybook.com.services.link_pagamento.dao.LinkPagamentoModel;
 import org.paybook.com.services.link_pagamento.dao.LinkPagamentoPreviewModel;
 import org.paybook.com.services.link_pagamento.dao.LinkPagamentoRepositoryFactory;
+import org.paybook.com.utils.RandomString;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -37,46 +37,68 @@ public class Cobranca111Service {
         this.cobrancaRepository = this.cobrancaRepositoryFactory.from(EnumTipoBook.B_101, EnumTipoCobranca.C_111);
     }
 
-    public Cobranca111Model novaCobranca(String idBook, Integer valor, Instant dataVencimento,
-                                         Destinatario destinatario) {
-        Cobranca111Model cobranca = new Cobranca111Model.Builder()
+    /**
+     * Creates a new {@link Cobranca111Model}
+     *
+     * @param idBook
+     * @param valor
+     * @param dataVencimento
+     * @param destinatario
+     * @param descricao
+     * @return
+     */
+    public Uni<Cobranca111Model> create(String idBook, Integer valor,
+                                        Instant dataVencimento,
+                                        Destinatario destinatario,
+                                        String descricao) {
+        log.infof("create Cobranca111 for [id_book=%s, valor=%s, data_vencimento=%s, destinatario=%s]",
+                idBook, valor, dataVencimento, destinatario);
+
+        final String idCobranca = generateIdCobranca();
+
+        LinkPagamentoModel linkPagamentoModel = LinkPagamentoFactory.from(valor,
+                dataVencimento,
+                idCobranca,
+                descricao);
+
+        LinkPagamentoPreviewModel linkPagamentoPreviewModel = LinkPagamentoPreviewModel.from(linkPagamentoModel);
+
+        Cobranca111Model cobrancaModel = new Cobranca111Model.Builder()
+                .documentID(idCobranca)
                 .idBook(idBook)
-                .idCobranca(RandomString.next())
                 .valor(valor)
                 .dataCriacao(Instant.now())
-                .status(EnumStatusCobranca.CHARGE_OPEN)
+                .status(EnumStatusCobranca.WAITING_PAYMENT)
                 .dataVencimento(dataVencimento)
                 .destinatario(destinatario)
+                .addLinksPagamento(linkPagamentoPreviewModel)
                 .build();
-        return this.registrar(cobranca);
+
+        return this.cobrancaRepository.add(cobrancaModel)
+                .onItem().transformToUni(dbDocument -> this.linkPagamentoRepositoryFactory.from(dbDocument)
+                        .add(linkPagamentoModel))
+                .map(ignored -> cobrancaModel);
     }
 
     /**
-     * Retorna a cobranca especificada pelo id.
-     *
      * @param idCobranca
      * @return
      */
-    public Optional<Cobranca111Model> obter(String idCobranca) {
-        return this.cobrancaRepository.getById(idCobranca)
-                .map(dbDocument -> dbDocument.toObject(Cobranca111Model.class));
-    }
-
-    public Uni<Optional<Cobranca111Model>> obterReactive(String idCobranca) {
+    public Uni<Optional<Cobranca111Model>> find(String idCobranca) {
         return this.cobrancaRepository.getByIdReactive(idCobranca)
                 .map(opt -> opt.map(dbDocument -> dbDocument.toObject(Cobranca111Model.class)));
     }
 
-    public Cobranca111Model incluir(Cobranca111Model cobrancaModel) {
-        return this.cobrancaRepository.add(cobrancaModel)
-                .toObject(Cobranca111Model.class);
-    }
-
     /**
      * Registra uma cobranca ja cadastrada. O registro consiste em gera o links de pagamento, dando inicio ao processo
-     * de cobranca.<p> Apenas cobrancas em aberto {@link EnumStatusCobranca#CHARGE_OPEN} podem ser registradas.<br> Na
-     * cobranca 111, o link gerado no registro corresponde ao valor total da cobranca, e com vencimento no mesmo dia da
-     * cobranca.
+     * de cobranca.
+     * <p>
+     * Apenas cobrancas em aberto {@link EnumStatusCobranca#CHARGE_OPEN} podem ser registradas.
+     * </p>
+     * <p>
+     * Na cobranca 111, o link gerado no registro corresponde ao valor total da cobranca, e com vencimento no mesmo dia
+     * da cobranca.
+     * </p>
      *
      * @param cobrancaModel
      * @return
@@ -84,12 +106,12 @@ public class Cobranca111Service {
     public Cobranca111Model registrar(Cobranca111Model cobrancaModel) {
         if (cobrancaModel.status() != EnumStatusCobranca.CHARGE_OPEN) {
             log.errorf("tentativa de registro de cobranca invalido. id=%s status=%s",
-                    cobrancaModel.idCobranca(),
+                    cobrancaModel.documentID(),
                     cobrancaModel.status().name());
         } else {
             LinkPagamentoModel linkPagamento = LinkPagamentoFactory.from(cobrancaModel.valor(),
                     cobrancaModel.dataVencimento(),
-                    cobrancaModel.idCobranca(),
+                    cobrancaModel.documentID(),
                     "descricao que vai acompanhar este link");
             LinkPagamentoPreviewModel linkPagamentoPreviewModel = LinkPagamentoPreviewModel.from(linkPagamento);
 
@@ -100,7 +122,7 @@ public class Cobranca111Service {
                     .build();
 
             this.cobrancaRepository.add(cobrancaModelComLink);
-            this.linkPagamentoRepositoryFactory.from(cobrancaModelComLink).add(linkPagamento);
+//            this.linkPagamentoRepositoryFactory.from(cobrancaModelComLink).add(linkPagamento);
         }
         return cobrancaModel;
     }
@@ -109,5 +131,9 @@ public class Cobranca111Service {
     }
 
     public void cancelar(Cobranca111Model cobranca111Model) {
+    }
+
+    private static String generateIdCobranca() {
+        return RandomString.next();
     }
 }

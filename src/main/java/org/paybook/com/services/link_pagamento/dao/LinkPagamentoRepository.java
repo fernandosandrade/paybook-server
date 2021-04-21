@@ -1,11 +1,12 @@
 package org.paybook.com.services.link_pagamento.dao;
 
+import io.smallrye.mutiny.Uni;
 import lombok.extern.jbosslog.JBossLog;
 import org.paybook.com.JsonWrapper;
+import org.paybook.com.db.CollectionPath;
 import org.paybook.com.db.DBDocument;
 import org.paybook.com.db.IDocumentRepository;
 import org.paybook.com.db.RepositoryFactory;
-import org.paybook.com.services.cobranca.dao.CobrancaBaseModel;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -29,14 +30,16 @@ public class LinkPagamentoRepository {
     @Inject
     RepositoryFactory repositoryFactory;
 
-    IDocumentRepository documentRepository;
+    private IDocumentRepository documentRepository;
 
-    LinkPagamentoRepository rootRepository(CobrancaBaseModel cobranca) {
-        this.documentRepository =
-                this.repositoryFactory.collection(
-                        Objects.requireNonNull(cobranca.documentReference(),
-                                "cobranca passada nao possui referencia para um documento do repositorio.")
-                                .getPath() + LINK_PAGAMENTO_COLLECTION);
+    private CollectionPath collectionPath;
+
+    LinkPagamentoRepository rootRepository(DBDocument documentoCobranca) {
+        Objects.requireNonNull(documentoCobranca.documentReference(),
+                "cobranca passada nao possui referencia para um documento do repositorio.");
+        log.infof("new link pagamento repository for [%s]", documentoCobranca.documentReference());
+        this.collectionPath = CollectionPath.of(documentoCobranca.documentReference(), LINK_PAGAMENTO_COLLECTION);
+        this.documentRepository = this.repositoryFactory.collection(this.collectionPath);
         return this;
     }
 
@@ -45,28 +48,29 @@ public class LinkPagamentoRepository {
         return this;
     }
 
-    public Optional<LinkPagamentoModel> getById(String idCobranca) {
+    public Uni<Optional<LinkPagamentoModel>> getById(String idCobranca) {
         return this.documentRepository.findFirst(CAMPO_ID_COBRANCA, idCobranca)
-                .map(dbDocument -> dbDocument.toObject(LinkPagamentoModel.class));
+                .map(opt -> opt.map(dbDocument -> dbDocument.toObject(LinkPagamentoModel.class)));
     }
 
-    public LinkPagamentoModel add(LinkPagamentoModel linkCobrancaModel) {
-        if (linkCobrancaModel.documentReference() != null) {
-            throw new IllegalArgumentException(
-                    "apenas documentos sem referencia podem ser adicionados. utilize a operacao de 'update' para " +
-                            "atualizar um documento ja existente");
-        }
-        DBDocument dbDocument = DBDocument.from(JsonWrapper.fromObject(linkCobrancaModel), null);
+    public Uni<LinkPagamentoModel> add(LinkPagamentoModel linkCobrancaModel) {
+        DBDocument dbDocument = DBDocument.from(
+                JsonWrapper.fromObject(linkCobrancaModel),
+                this.collectionPath,
+                linkCobrancaModel.documentID());
+
         return this.documentRepository.save(dbDocument)
-                .toObject(LinkPagamentoModel.class);
+                .onItem().transform(doc -> doc.toObject(LinkPagamentoModel.class));
     }
 
-    public LinkPagamentoModel update(LinkPagamentoModel linkCobrancaModel) {
-        Objects.requireNonNull(linkCobrancaModel.documentReference(), "referencia do documento nao pode ser nula");
-        DBDocument dbDocument = DBDocument.from(JsonWrapper.fromObject(linkCobrancaModel),
-                linkCobrancaModel.documentReference());
+    public Uni<LinkPagamentoModel> update(LinkPagamentoModel linkCobrancaModel) {
+        Objects.requireNonNull(linkCobrancaModel.documentID(), "id do documento nao pode ser nula");
+        DBDocument dbDocument = DBDocument.from(
+                JsonWrapper.fromObject(linkCobrancaModel),
+                this.collectionPath,
+                linkCobrancaModel.documentID());
         return this.documentRepository.save(dbDocument)
-                .toObject(LinkPagamentoModel.class);
+                .onItem().transform(doc -> doc.toObject(LinkPagamentoModel.class));
     }
 
 }

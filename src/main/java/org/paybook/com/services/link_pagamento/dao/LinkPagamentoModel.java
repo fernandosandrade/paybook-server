@@ -13,8 +13,8 @@ import java.time.Instant;
 @Value.Immutable
 public interface LinkPagamentoModel extends DocumentRepositoryModel {
 
-    /** id do link de pagamento */
-    String id();
+//    /** id do link de pagamento */
+//    String id();
 
     /** id estrangeiro, que permite associar este link a um componente externo, como uma cobrança */
     @JsonProperty("id_cobranca")
@@ -29,6 +29,10 @@ public interface LinkPagamentoModel extends DocumentRepositoryModel {
     Integer valorTaxas();
 
     /** descricao que pode acompanhar o link gerado */
+//    @Value.Default
+//    default String descricao() {
+//        return "not_informed";
+//    }
     String descricao();
 
     /** url gerada para a cobranca */
@@ -42,5 +46,6 @@ public interface LinkPagamentoModel extends DocumentRepositoryModel {
 
     class Builder extends ImmutableLinkPagamentoModel.Builder {
     }
+
 
 }

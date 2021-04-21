@@ -1,4 +1,4 @@
-package org.paybook.com;
+package org.paybook.com.utils;
 
 import javax.ws.rs.core.Response;
 

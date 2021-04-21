@@ -6,7 +6,7 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.paybook.com.dto.LinkPagamentoDto;
+import org.paybook.com.controller.dto.LinkPagamentoDto;
 import org.paybook.com.services.link_pagamento.LinkPagamentoService;
 
 import static io.restassured.RestAssured.given;

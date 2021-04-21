@@ -1,6 +1,6 @@
 package org.paybook.com.services.link_pagamento.dao;
 
-import org.paybook.com.services.cobranca.dao.CobrancaBaseModel;
+import org.paybook.com.db.DBDocument;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -15,13 +15,13 @@ public class LinkPagamentoRepositoryFactory {
     /**
      * Retorna um novo objeto de acesso aos links de pagamento especificos de uma cobranca.
      *
-     * @param cobranca cobranca da qual serao obtidos os links de pagamento
+     * @param documentoCobranca cobranca da qual serao obtidos os links de pagamento
      * @return
      */
-    public <T extends CobrancaBaseModel> LinkPagamentoRepository from(T cobranca) {
+    public LinkPagamentoRepository from(DBDocument documentoCobranca) {
         return this.provider
                 .get()
-                .rootRepository(cobranca);
+                .rootRepository(documentoCobranca);
     }
 
     /**

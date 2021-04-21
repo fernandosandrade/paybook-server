@@ -1,8 +1,8 @@
 package org.paybook.com.services.link_pagamento;
 
 import lombok.extern.jbosslog.JBossLog;
-import org.paybook.com.RandomString;
 import org.paybook.com.services.link_pagamento.dao.LinkPagamentoModel;
+import org.paybook.com.utils.RandomString;
 
 import java.time.Instant;
 
@@ -16,7 +16,7 @@ public abstract class LinkPagamentoFactory {
         var url = "https://paybook/cobranca?id=123456789";
         var id = RandomString.next();
         return new LinkPagamentoModel.Builder()
-                .id(id)
+                .documentID(id)
                 .idCobranca(idCobranca)
                 .valorPrincipal(valor)
                 .valorTaxas(Math.round(valor / 100))

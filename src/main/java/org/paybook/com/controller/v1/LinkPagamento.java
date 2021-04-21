@@ -1,7 +1,7 @@
 package org.paybook.com.controller.v1;
 
 import lombok.extern.jbosslog.JBossLog;
-import org.paybook.com.dto.LinkPagamentoDto;
+import org.paybook.com.controller.dto.LinkPagamentoDto;
 import org.paybook.com.services.cobranca.EnumStatusCobranca;
 import org.paybook.com.services.link_pagamento.EnumStatusLinkPagamento;
 import org.paybook.com.services.link_pagamento.LinkPagamentoService;
