@@ -47,7 +47,7 @@ class LinkPagamentoPreviewModelTest {
     @Test
     void testLinkPagamentoPreviewModelDesserialization() {
         String id = "id_teste";
-        Integer valor = 100;
+        Integer valor = 10000;
         Instant vencimento = Instant.now();
         EnumStatusLinkPagamento status = EnumStatusLinkPagamento.WAITING_PAIMENT;
 
@@ -77,7 +77,7 @@ class LinkPagamentoPreviewModelTest {
     @Test
     void testLinkPagamentoPreviewModelSerialization() {
         String id = "id_teste";
-        Integer valor = 100;
+        Integer valor = 10000;
         Instant vencimento = Instant.now();
         EnumStatusLinkPagamento status = EnumStatusLinkPagamento.WAITING_PAIMENT;
 
@@ -99,7 +99,7 @@ class LinkPagamentoPreviewModelTest {
     @Test
     void assertObjectEquals() {
         String id = "id_teste";
-        Integer valor = 100;
+        Integer valor = 10000;
         Instant vencimento = DefaultTimes.now();
         EnumStatusLinkPagamento status = EnumStatusLinkPagamento.WAITING_PAIMENT;
 

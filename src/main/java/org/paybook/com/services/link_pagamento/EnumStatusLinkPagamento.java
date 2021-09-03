@@ -1,5 +1,10 @@
 package org.paybook.com.services.link_pagamento;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
+import java.util.stream.Stream;
+
 /**
  * Define os possiveis status de um link de pagamento.
  * <p>
@@ -15,7 +20,7 @@ package org.paybook.com.services.link_pagamento;
 public enum EnumStatusLinkPagamento {
 
     /** link aguardando o pagamento */
-    WAITING_PAIMENT(1),
+    WAITING_PAIMENT(5),
 
     /** link pago */
     LINK_PAID(10),
@@ -32,13 +37,22 @@ public enum EnumStatusLinkPagamento {
     /** link vencido */
     LINK_EXPIRED(90);
 
-    private int valor;
+    private int status;
 
     EnumStatusLinkPagamento(int status) {
-        this.valor = status;
+        this.status = status;
     }
 
-    public int getValor() {
-        return this.valor;
+    @JsonCreator
+    static EnumStatusLinkPagamento fromStatus(int status) {
+        return Stream.of(EnumStatusLinkPagamento.values())
+                .filter(enumStatusLinkPagamento -> enumStatusLinkPagamento.status == status)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Invalid EnumStatusLinkPagamento status code: " + status));
+    }
+
+    @JsonValue
+    public int getStatus() {
+        return this.status;
     }
 }

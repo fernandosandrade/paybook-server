@@ -1,0 +1,27 @@
+@startuml
+top to bottom direction
+left to right direction
+package users {
+object user {
+books collection
+}
+}
+
+package books {
+object book {
+charges collection
+}
+}
+package charges {
+object charge {
+payment_links collection
+}
+}
+package payment_links {
+object paylink
+}
+
+user --> books
+book --> charges
+charge --> payment_links
+@enduml

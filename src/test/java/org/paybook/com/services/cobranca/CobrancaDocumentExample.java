@@ -1,8 +1,8 @@
 package org.paybook.com.services.cobranca;
 
 import lombok.Value;
+import org.paybook.com.RandomString;
 import org.paybook.com.services.Destinatario;
-import org.paybook.com.utils.RandomString;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -25,7 +25,7 @@ public class CobrancaDocumentExample {
                 "valor", 1000,
                 "data_vencimento", Instant.now().plus(30, ChronoUnit.DAYS).toEpochMilli(),
                 "data_criacao", Instant.now().toEpochMilli(),
-                "status", EnumStatusCobranca.CHARGE_OPEN.name(),
+                "status", EnumChargeStatus.CHARGE_OPEN.name(),
                 "atributo_teste", "valor atributo teste",
                 "links_cobranca", List.of("link_01", "link_02"))
         );

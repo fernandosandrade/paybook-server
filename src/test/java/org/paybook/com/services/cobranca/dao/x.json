@@ -1,0 +1,20 @@
+{
+  "charge_type": 111,
+  "payment_links": [],
+  "receiver": {
+    "telefone": "998875997",
+    "nome": "Amogueco",
+    "email": "aline@gmail.com"
+  },
+  "creation_date": {
+    "seconds": 1628262000,
+    "nanos": 0
+  },
+  "expiration_date": {
+    "seconds": 1630443600,
+    "nanos": 0
+  },
+  "document_id": "5X00Y2G3KCIY9D2VP4H9",
+  "value": 123,
+  "status": 0
+}

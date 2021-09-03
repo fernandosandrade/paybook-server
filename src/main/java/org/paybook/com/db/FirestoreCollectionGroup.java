@@ -1,14 +1,17 @@
 package org.paybook.com.db;
 
+import com.google.cloud.firestore.Query;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import lombok.extern.jbosslog.JBossLog;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
- * IMplementa o acesso a um <i>collection group</i> do firestore
+ * Implementa o acesso a um <i>collection group</i> do firestore
  */
 @JBossLog
 class FirestoreCollectionGroup implements IDocumentRepository {
@@ -32,8 +35,18 @@ class FirestoreCollectionGroup implements IDocumentRepository {
     }
 
     @Override
+    public DBDocument save(DBDocument document, BatchWriter batch) {
+        return null;
+    }
+
+    @Override
     public Multi<DBDocument> saveAll(List<DBDocument> documents) {
         return null;
+    }
+
+    @Override
+    public Uni<Optional<DBDocument>> findByID(String documentID) {
+        return Uni.createFrom().item(Optional.empty());
     }
 
     @Override
@@ -64,5 +77,17 @@ class FirestoreCollectionGroup implements IDocumentRepository {
     @Override
     public Uni<Long> deleteAll() {
         return Uni.createFrom().item(0L);
+    }
+
+    private List<DBDocument> query(Query query) {
+        try {
+            List<QueryDocumentSnapshot> documents = query.get().get().getDocuments();
+            List<DBDocument> collect = documents.stream()
+                    .map(doc -> DBDocument.from(doc))
+                    .collect(Collectors.toList());
+            return collect;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

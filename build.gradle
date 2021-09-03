@@ -11,20 +11,20 @@ idea {
 }
 
 repositories {
-    //mavenLocal()
     mavenCentral()
 }
 
 dependencies {
+    implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
     implementation 'io.quarkus:quarkus-hibernate-validator'
     implementation 'io.quarkus:quarkus-resteasy-reactive-jackson'
     implementation 'io.quarkus:quarkus-resteasy-reactive'
-    implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
     implementation 'io.quarkus:quarkus-vertx'
     implementation 'io.quarkus:quarkus-arc'
     implementation 'org.projectlombok:lombok:1.18.16'
     implementation 'org.immutables:value:2.8.8'
-    implementation 'com.google.firebase:firebase-admin:7.1.0'
+    implementation 'com.google.firebase:firebase-admin:8.0.1'
+//    implementation 'io.quarkus:quarkus-smallrye-openapi:2.0.0.CR3'
 
     //compileOnly("org.immutables:value-annotations:2.8.8")
     annotationProcessor 'org.immutables:value:2.8.8'
@@ -35,8 +35,9 @@ dependencies {
 
     testImplementation 'io.quarkus:quarkus-junit5'
     testImplementation 'io.rest-assured:rest-assured'
-    testImplementation group: 'io.quarkus', name: 'quarkus-junit5-mockito', version: '1.12.1.Final'
+    testImplementation group: 'io.quarkus', name: 'quarkus-junit5-mockito', version: '2.1.0.Final'
 
+    implementation 'com.google.cloud:google-cloud-firestore:3.0.2'
 }
 
 group 'paybook'

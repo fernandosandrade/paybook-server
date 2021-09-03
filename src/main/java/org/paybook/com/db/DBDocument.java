@@ -8,11 +8,12 @@ import org.paybook.com.JsonWrapper;
 import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
- * Representa um documento generico do repositorio.
+ * Represents a repository document.
  * <p>
- * Armazena os atributos do documento e a referencia ao mesmo (caso ja exista na base)
+ * Store the document data (as a {@code Map<String,Object>}) and its reference
  * </p>
  */
 @Value
@@ -46,10 +47,14 @@ public class DBDocument {
     }
 
     public static DBDocument from(Map<String, Object> data,
-                                  @Nullable CollectionPath collectionPath,
+                                  @Nullable String collectionPath,
                                   String documentID) {
         Objects.requireNonNull(data);
-        return new DBDocument(data, CollectionPath.of(collectionPath.getPath(), documentID).getPath());
+        Map<String, Object> collect = data.entrySet().stream()
+                .filter(entry -> !entry.getKey().equals(DocumentRepositoryModel.DOCUMENT_ID_FIELD))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+//        data.remove(DocumentRepositoryModel.DOCUMENT_ID_FIELD);
+        return new DBDocument(collect, DocumentReferencePath.of(collectionPath, documentID).getPath());
     }
 
     /**
@@ -60,7 +65,7 @@ public class DBDocument {
      * @return
      */
     public <T extends DocumentRepositoryModel> T toObject(Class<T> classeCobranca) {
-        //this.data.put("document_reference", this.documentReference);
+        this.data.put(DocumentRepositoryModel.DOCUMENT_ID_FIELD, this.id());
         return JsonWrapper.toObject(this.data, classeCobranca);
     }
 

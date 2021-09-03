@@ -1,7 +1,6 @@
 package org.paybook.com;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 
 public abstract class DefaultTimes {
 
@@ -14,6 +13,9 @@ public abstract class DefaultTimes {
      * @return
      */
     public static final Instant now() {
-        return Instant.now().truncatedTo(ChronoUnit.MILLIS);
+        return Instant.now();
     }
+//    public static final Instant now() {
+//        return Instant.now().truncatedTo(ChronoUnit.MILLIS);
+//    }
 }

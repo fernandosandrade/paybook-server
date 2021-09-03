@@ -6,7 +6,8 @@ package org.paybook.com.exception;
 public enum ExceptionType {
     ENTITY_NOT_FOUND("not.found"),
     DUPLICATE_ENTITY("duplicate"),
-    ENTITY_EXCEPTION("exception");
+    ENTITY_EXCEPTION("exception"),
+    ILLEGAL_ARGUMENT("illegal.argument");
 
     String value;
 

@@ -8,11 +8,11 @@ import java.util.Optional;
 
 public class ExceptionFactory {
 
-    private static Config propertiesConfig;
+    private static Config propertiesConfig = ConfigProvider.getConfig();
 
-    public ExceptionFactory() {
-        ExceptionFactory.propertiesConfig = ConfigProvider.getConfig();
-    }
+//    public ExceptionFactory() {
+//        ExceptionFactory.propertiesConfig = ConfigProvider.getConfig();
+//    }
 
     /**
      * Returns new RuntimeException based on template and args
@@ -46,7 +46,8 @@ public class ExceptionFactory {
      * @param args
      * @return
      */
-    public static RuntimeException throwExceptionWithId(EntityType entityType, ExceptionType exceptionType, String id, String... args) {
+    public static RuntimeException throwExceptionWithId(EntityType entityType, ExceptionType exceptionType, String id,
+                                                        String... args) {
         String messageTemplate = getMessageTemplate(entityType, exceptionType).concat(".").concat(id);
         return throwException(exceptionType, messageTemplate, args);
     }
@@ -60,7 +61,8 @@ public class ExceptionFactory {
      * @param args
      * @return
      */
-    public static RuntimeException throwExceptionWithTemplate(EntityType entityType, ExceptionType exceptionType, String messageTemplate, String... args) {
+    public static RuntimeException throwExceptionWithTemplate(EntityType entityType, ExceptionType exceptionType,
+                                                              String messageTemplate, String... args) {
         return throwException(exceptionType, messageTemplate, args);
     }
 
@@ -71,11 +73,14 @@ public class ExceptionFactory {
      * @param args
      * @return
      */
-    private static RuntimeException throwException(ExceptionType exceptionType, String messageTemplate, String... args) {
+    private static RuntimeException throwException(ExceptionType exceptionType, String messageTemplate,
+                                                   String... args) {
         if (ExceptionType.ENTITY_NOT_FOUND.equals(exceptionType)) {
             return new EntityNotFoundException(format(messageTemplate, args));
         } else if (ExceptionType.DUPLICATE_ENTITY.equals(exceptionType)) {
             return new DuplicateEntityException(format(messageTemplate, args));
+        } else if (ExceptionType.ILLEGAL_ARGUMENT.equals(exceptionType)) {
+            return new IllegalArgumentException(format(messageTemplate, args));
         }
         return new RuntimeException(format(messageTemplate, args));
     }
@@ -106,6 +111,12 @@ public class ExceptionFactory {
 
     public static class DuplicateEntityException extends ApplicationException {
         public DuplicateEntityException(String message) {
+            super(message);
+        }
+    }
+
+    public static class IllegalArgumentException extends ApplicationException {
+        public IllegalArgumentException(String message) {
             super(message);
         }
     }

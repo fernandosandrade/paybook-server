@@ -17,8 +17,8 @@ class LinkPagamentoModelTest {
     void popularFromMapTest() {
         String id = "id_teste";
         String idCobranca = "id_cobranca_teste";
-        Integer valorPrincipal = 100;
-        Integer valorTaxas = 10;
+        Integer valorPrincipal = 1000;
+        Integer valorTaxas = 1000;
         String descricao = "descricao_teste";
         String url = "https://urlteste";
         Instant vencimento = Instant.now();
@@ -36,7 +36,7 @@ class LinkPagamentoModelTest {
         LinkPagamentoModel modelFromJson = JsonWrapper.toObject(jsonAsMap, LinkPagamentoModel.class);
 
         LinkPagamentoModel modelFromNew = new LinkPagamentoModel.Builder()
-                .id(id)
+                .documentID(id)
                 .idCobranca(idCobranca)
                 .valorPrincipal(valorPrincipal)
                 .valorTaxas(valorTaxas)
@@ -46,7 +46,7 @@ class LinkPagamentoModelTest {
                 .status(status)
                 .build();
 
-        assertEquals(modelFromNew.id(), modelFromJson.id());
+        assertEquals(modelFromNew.documentID(), modelFromJson.documentID());
         assertEquals(modelFromNew.idCobranca(), modelFromJson.idCobranca());
         assertEquals(modelFromNew.valorPrincipal(), modelFromJson.valorPrincipal());
         assertEquals(modelFromNew.valorTaxas(), modelFromJson.valorTaxas());

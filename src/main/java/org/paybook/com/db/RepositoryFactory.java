@@ -21,9 +21,21 @@ public class RepositoryFactory {
      * @param
      * @return
      */
-    public IDocumentRepository collection(CollectionPath collectionPath) {
+    @Deprecated
+    public IDocumentRepository collection(DocumentReferencePath documentReferencePath) {
         return FirestoreCollection.of(this.firestoreService,
-                this.firestoreService.get().collection(collectionPath.getPath()));
+                this.firestoreService.get().collection(documentReferencePath.getPath()));
+    }
+
+    /**
+     * Retorna acesso a coleção de documentos existente no path passado.
+     *
+     * @param
+     * @return
+     */
+    public IDocumentRepository collection(String collectionPath) {
+        return FirestoreCollection.of(this.firestoreService,
+                this.firestoreService.get().collection(collectionPath));
     }
 
     /**

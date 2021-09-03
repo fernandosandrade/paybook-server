@@ -1,9 +1,6 @@
 package org.paybook.com.db;
 
-import com.google.cloud.firestore.CollectionReference;
-import com.google.cloud.firestore.Query;
-import com.google.cloud.firestore.QueryDocumentSnapshot;
-import com.google.cloud.firestore.SetOptions;
+import com.google.cloud.firestore.*;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import lombok.SneakyThrows;
@@ -38,25 +35,27 @@ class FirestoreCollection implements IDocumentRepository {
     @Override
     @SneakyThrows
     public Uni<DBDocument> save(DBDocument document) {
-//        if (Objects.isNull(document.documentReference())) {
-//            return Uni.createFrom()
-//                    .item(Unchecked.supplier(() ->
-//                            this.firestoreOperations.persist(this.collectionReference.add(document.data()))));
-//        } else {
-//            this.firestoreService.get().document(document.documentReference()).set(document.data(),
-//                    SetOptions.merge());
-        return Uni.createFrom()
-                .item(() -> {
-                    this.persist(document.data(), document.documentReference());
-                    return document;
-                });
-//                        .chain(() -> Uni.createFrom().item(document));
+        return Uni.createFrom().item(() -> {
+            this.persist(document.data(), document.documentReference());
+            return document;
+        });
     }
 
+    @Override
+    public DBDocument save(DBDocument document, BatchWriter batch) {
+        batch.set(document.documentReference(), document.data());
+        return document;
+    }
 
     @Override
     public Multi<DBDocument> saveAll(List<DBDocument> documents) {
         return null;
+    }
+
+    @Override
+    public Uni<Optional<DBDocument>> findByID(String documentID) {
+        return Uni.createFrom()
+                .item(() -> this.query(this.collectionReference.document(documentID)));
     }
 
     @Override
@@ -89,6 +88,15 @@ class FirestoreCollection implements IDocumentRepository {
     @Override
     public Uni<Long> deleteAll() {
         return Uni.createFrom().item(0L);
+    }
+
+    private Optional<DBDocument> query(DocumentReference document) {
+        try {
+            DocumentSnapshot doc = document.get().get();
+            return doc.exists() ? Optional.of(DBDocument.from(doc)) : Optional.empty();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private List<DBDocument> query(Query query) {

@@ -1,8 +1,8 @@
 package org.paybook.com.services.link_pagamento;
 
 import lombok.extern.jbosslog.JBossLog;
+import org.paybook.com.RandomString;
 import org.paybook.com.services.link_pagamento.dao.LinkPagamentoModel;
-import org.paybook.com.utils.RandomString;
 
 import java.time.Instant;
 
@@ -19,7 +19,7 @@ public abstract class LinkPagamentoFactory {
                 .documentID(id)
                 .idCobranca(idCobranca)
                 .valorPrincipal(valor)
-                .valorTaxas(Math.round(valor / 100))
+                .valorTaxas(valor)
                 .vencimento(vencimento)
                 .status(EnumStatusLinkPagamento.WAITING_PAIMENT)
                 .descricao(descricao)

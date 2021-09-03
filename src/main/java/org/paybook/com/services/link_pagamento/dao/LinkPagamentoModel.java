@@ -3,9 +3,11 @@ package org.paybook.com.services.link_pagamento.dao;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.immutables.value.Value;
+import org.paybook.com.GoogleTimestampAdapter;
 import org.paybook.com.db.DocumentRepositoryModel;
 import org.paybook.com.services.link_pagamento.EnumStatusLinkPagamento;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
 
 @JsonDeserialize(builder = LinkPagamentoModel.Builder.class)
@@ -33,12 +35,14 @@ public interface LinkPagamentoModel extends DocumentRepositoryModel {
 //    default String descricao() {
 //        return "not_informed";
 //    }
+    @Nullable
     String descricao();
 
     /** url gerada para a cobranca */
     String url();
 
     /** data em que esta cobranca passa a nao ser mais valida */
+    @JsonDeserialize(using = GoogleTimestampAdapter.Deserializer.class)
     Instant vencimento();
 
     /** status do link de pagamento */

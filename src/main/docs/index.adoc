@@ -1,7 +1,8 @@
-= AsciiDoc Writer's Guide
+= Paybook
 Doc Writer <doc.writer@asciidoctor.org>
 v1.0, 2014-08-01
 :toc: left
+:toclevels: 3
 
 == Visão geral
 
@@ -21,7 +22,7 @@ Quando todos os links de uma cobrança são quitados, a cobrança é dada como '
 **Link de pagamento**: é o objeto por meio do qual a cobranca é paga.
 Toda cobrança possui ao menos um link de pagamento.
 Cada link de uma cobrança pode ser considerado uma *parcela*.
-Quando o link é pago, a cobrança pode ser encerrada - no caso de cobrança única - ou não - no caso de cobrança parcelada em mais de um link ou cobrança recorrente, onde os links são gerados de forma periódica.
+Quando o link é pago, a cobrança pode ser encerrada - no caso de cobrança única; ou não - no caso de cobrança parcelada em mais de um link; ou cobrança recorrente, onde os links são gerados de forma periódica.
 
 O caso de uso abaixo apresenta a criação de uma cobrança genérica no aplicativo.
 
@@ -82,75 +83,83 @@ Para maiores detalhes a respeito do fluxo das cobranças, consultar cada tipo em
 
 == Books e tipos de cobrança
 
-=== API comum para todos os tipos de cobranca
-
-```
- GET /cobrancas/{tipo_book}/{tipo_cobranca}/{id_cobranca}
-200: OK - retorna o map<string,object> do documento recuperado da base
-404: NOT_FOUND - caso de algum dos parametros seja invalido
-```
-
 === 101 - Book simples
 
 Book onde as cobranças são cadastradas de forma individual, de acordo com a necessidade.
 Permite as seguintes cobranças:
-- simples: 111 É possivel definir um conjunto de configurações default em um book simples, que serão utilizadas na criação das cobranças do book (prazo padrão, multa por atraso, etc)
 
 ==== 111 - Cobrança simples
 
-Cobrança que ocorre de forma única com um valor inicialmente definido e um destinatário.
-A cobrança pode ser feita em uma ou mais parcelas.
-Assim que todas as parcelas forem pagas, a cobrança fica quitada.
+Cobrança que ocorre de forma única com um valor inicialmente definido, uma data de vencimento, e um destinatário.
+A cobrança gera um único link de pagamento (para múltiplas parcelas, ver a cobrança <<112 - Cobrança parcelada>>).
+Assim que o link é pago, a cobrança fica quitada.
 Uma vez quitada, não pode mais ser utilizada.
-Ao criar a cobrança, o servidor atribui a cada parcela de pagamento um id, permitindo que a parcela seja obtida sem necessidade de obter toda a cobrança.
 
-Por padrão, quando a cobrança é criada, um link de pagamento é criado e vinculado a ela.
+[plantuml,align="center"]
+....
+@startuml
+skinparam sequenceMessageAlign right
+App -> Server : POST charge_id
+Server -> App : payment link
+@enduml
+....
+
 O link possui os mesmos dados da cobrança (valor, destinatario e vencimento).
-É possivel alterar a cobrança, refletindo em alterações no link de pagamento.
+É possivel posteriormente alterar a cobrança, refletindo em alterações no link de pagamento.
 
-[source]
-----
- REGISTRO DE COBRANCA
- PUT /cobrancas/101/111/
- // faz o registro da mesma, criando os links de pagamento necessarios.
- { "id_cobranca" : "abc123" }
- retorno:
- 201 - CREATED
-----
+[frame=ends,grid=rows]
+[cols="1,1"]
+|===
+|GET /v1/charges/101/{book_id}/111/
+|return all charges of informed book
 
-```
- CRIACAO E REGISTRO DE COBRANCA
- POST /cobrancas/101/111/
- // cadastra a cobranca com os dados informados e então registra.
- {
-	dados da cobranca...
- }
- retorno:
- 201 - CREATED
-```
+|GET /v1/charges/101/{book_id}/111/{charge_id}
+|return specific charge of informed charge
 
-```
- ALTERACAO DA COBRANCA
- PUT /cobrancas/101/111/
- { "id_cobranca" : "abc123", novos dados... }
- // sao transmitidos apenas os dados de form. dados gerados no server nao sao alterados.
- 200 - OK
- 404 - NOT_FOUND
-```
+|POST /v1/charges/101/{book_id}/111/{charge_id}/paylinks
+|create payment links for this charge
 
-```
- ALTERACAO DO STATUS DA COBRANCA
- PATCH /cobrancas/101/111/
- {
-	"id_cobranca" : "abc123",
-	"op" : "change_status",
-	"value" : "novo_status"
- }
- status possíveis: CHARGE_CANCELED
- // operacao utilizada para cancelamento de cobranca
- 200 - OK
- 404 - NOT_FOUND
-```
+|PUT /v1/charges/101/{book_id}/111/{charge_id}/paylinks
+|update payment links for this charge
+|===
+
+==== 112 - Cobrança parcelada
+
+É definido um valor, destinatário e dois ou mais vencimentos.
+O valor total é distribuido entre os vencimentos.
+A cobrança é quitada assim que todas as parcelas forem pagas.
+
+[plantuml,align="center"]
+....
+@startuml
+package charges {
+object charge {
+valor: R$300
+}
+}
+
+package paylinks {
+object payment_link_3 {
+valor: R$100
+vencimento: 05/03/2021
+}
+object payment_link_2 {
+valor: R$100
+vencimento: 05/02/2021
+}
+object payment_link_1 {
+valor: R$100
+vencimento: 05/01/2021
+}
+}
+
+charge --> payment_link_1
+charge --> payment_link_2
+charge --> payment_link_3
+@enduml
+....
+
+A distribuição do valor total da cobrança entre os links é livre, desde que a soma de todos corresponda ao valor total da cobrança
 
 === 201 - Book mensalidade
 
@@ -164,7 +173,7 @@ Cobrança parte de um valor basico definido (como valor por hora, ou por dia) e 
 
 Permite dividir um valor entre os destinatarios cadastrados no book, gerando uma cobranca para cada um.
 
-== links de pagamento
+== Links de pagamento
 
 ```
 GET /linkpagamento/
@@ -201,5 +210,8 @@ include::diagrams/pagamento_link.puml[]
  200 - CREATED
 ```
 
+== Cancelamento de books e cobranças
 
+O alteração de status para cancelado é feita sempre via APP (ambiente logado).
+O server identifica a alteração e executa as ações necessárias.
 

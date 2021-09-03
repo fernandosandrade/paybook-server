@@ -22,11 +22,15 @@ public interface IDocumentRepository {
      */
     Uni<DBDocument> save(DBDocument document);
 
+    DBDocument save(DBDocument document, BatchWriter batch);
+
     Multi<DBDocument> saveAll(List<DBDocument> documents);
 
     Uni<Optional<DBDocument>> findFirst(String campo, Object valor);
 
     Multi<DBDocument> findAll(String campo, Object valor);
+
+    Uni<Optional<DBDocument>> findByID(String documentID);
 
     Uni<Long> count();
 
