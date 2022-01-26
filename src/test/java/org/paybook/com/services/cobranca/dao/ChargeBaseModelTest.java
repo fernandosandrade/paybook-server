@@ -49,13 +49,12 @@ class ChargeBaseModelTest {
         document = DBDocument.from(Map.of(
                         "document_id", ID_COBRANCA,
                         "id_book", ID_BOOK,
-                        "destinatario", DESTINATARIO,
-                        "valor", 1000,
-                        "data_vencimento", DATA_VENCIMENTO,
-                        "data_criacao", DATA_CRIACAO,
+                        "receiver", DESTINATARIO,
+                        "amount", 1000,
+                        "creation_date", DATA_CRIACAO,
                         "status", EnumChargeStatus.CHARGE_OPEN.name(),
                         "atributo_teste", VALOR_ATRIBUTO_TESTE,
-                        "links_pagamento", List.of()),
+                        "payment_links", List.of()),
                 DocumentReferencePath.of("test_path").getPath(),
                 ID_COBRANCA);
     }
@@ -65,9 +64,9 @@ class ChargeBaseModelTest {
         ChargeTestModel cobrancaModel = JsonWrapper.toObject(document.data(), ChargeTestModel.class);
 
         assertEquals(document.data().get("document_id"), cobrancaModel.documentID());
-        assertEquals(document.data().get("destinatario"), cobrancaModel.receiver());
-        assertEquals(document.data().get("valor"), cobrancaModel.amount());
-        assertEquals(document.data().get("data_criacao"), cobrancaModel.creationDate());
+        assertEquals(document.data().get("receiver"), cobrancaModel.receiver());
+        assertEquals(document.data().get("amount"), cobrancaModel.amount());
+        assertEquals(document.data().get("creation_date"), cobrancaModel.creationDate());
         assertEquals(EnumChargeStatus.valueOf(document.data().get("status").toString()), cobrancaModel.status());
         assertEquals(document.data().get("atributo_teste"), cobrancaModel.atributoTeste());
 
@@ -103,7 +102,7 @@ class ChargeBaseModelTest {
         assertEquals(cobrancaModel.atributoTeste(), jsonMap.get("atributo_teste"));
         LinkPagamentoPreviewModel linkPagamentoPreviewModel = cobrancaModel.paymentLinks().get(0);
         assertEquals(cobrancaModel.paymentLinks().get(0),
-                JsonWrapper.toObject((Map<String, Object>) ((ArrayList) jsonMap.get("links_pagamento")).get(0),
+                JsonWrapper.toObject((Map<String, Object>) ((ArrayList) jsonMap.get("payment_links")).get(0),
                         LinkPagamentoPreviewModel.class));
     }
 

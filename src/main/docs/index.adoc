@@ -83,6 +83,21 @@ Para maiores detalhes a respeito do fluxo das cobranças, consultar cada tipo em
 
 == Books e tipos de cobrança
 
+[plantuml,align="center"]
+....
+@startuml
+state "101" : book simples.\ncada cobrança é\ncriada individualmente
+
+state q1 <<choice>>
+state q2 <<choice>>
+state q3 <<choice>>
+
+[*] -> q1 : cobranças seguirão\numa cobrança padrão?
+q1 -> 101 : não
+q1 -> q2 : sim
+@enduml
+....
+
 === 101 - Book simples
 
 Book onde as cobranças são cadastradas de forma individual, de acordo com a necessidade.
@@ -163,15 +178,54 @@ A distribuição do valor total da cobrança entre os links é livre, desde que 
 
 === 201 - Book mensalidade
 
-Permite configurar definições gerais como valor e vencimento, para em seguida cadastrar destinatarios que receberão a cobrança
+==== Visão geral
+
+Permite configurar definições gerais como valor e vencimento, para em seguida cadastrar destinatarios que receberão a cobrança.
+
+==== Valor
+
+O valor base sempre deverá ser informado.
+Caso seja necessário, é possivel realizar o ajuste deste valor base para cada um dos destinatários da cobrança, podendo ser aplicado um desconto ou acréscimo de um valor específico ou percentual ao valor base.
+
+Exemplo:
+
+valor base: $100
+
+- destinatário A: +10%
+- destinatario B: - $20
+
+==== Vencimento
+
+Sempre deverá ser informada a frequência com que as cobranças serão enviadas aos destinatários.
+Pode-se definir:
+
+- um ou mais dias especificos do mês. ex: todo dia 5
+- um ou mais dias da semana. ex: toda 2ª e 4ª feira
+- uma ou mais datas relativas. ex: todo 5º dia útil do mês
+
+Caso desejado, o vencimento pode ser ajustado de forma individual para cada destinatário
 
 === 301 - Book mensalidade por uso
 
-Cobrança parte de um valor basico definido (como valor por hora, ou por dia) e para cada destinatario é possivel definir um multiplicados (por exemplo, valor base * 10)
+==== Visão geral
 
-=== 401 - Book divisao de valor
+Segue a mesma lógica do <<201 - Book mensalidade>>, porém, parte de um valor basico definido (como valor por hora, ou por dia) e para cada destinatario é possivel definir um multiplicados (por exemplo, valor base * 10)
 
-Permite dividir um valor entre os destinatarios cadastrados no book, gerando uma cobranca para cada um.
+=== 401 - Book para divisão de valor
+
+==== Visão geral
+
+Permite dividir um valor entre os destinatarios cadastrados no book, gerando uma cobrança para cada um.
+
+==== Valor
+
+Deve ser informado um valor, que será por padrão dividido entre todos os destinatários do book.
+É possivel excluir um ou mais destinatários de uma divisão, bem como realizar ajustes individuais de valor.
+O valor a ser dividido pode ser alterado para cada <<Remessa de cobrança>> de cobrança gerada.
+
+==== Remessa de cobrança
+
+Neste book as cobranças não possuem uma data de vencimento previamente definida, mas são geradas por demanda, ou seja, o usuário acessa o book e solicita o envio da cobrança aos destinatários quando desejar (para que as cobranças sejam enviadas com frequencia de forma automática, utilizar <<201 - Book mensalidade>>)
 
 == Links de pagamento
 

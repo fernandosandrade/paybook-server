@@ -7,18 +7,25 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
 import lombok.extern.jbosslog.JBossLog;
-import org.eclipse.microprofile.config.ConfigProvider;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.util.Optional;
 
 @JBossLog
 @Singleton
 public class FirestoreService {
 
     private static final String PROJECT_ID = "plink";
+
+    private static final String FIREBASE_CREDENTIALS_FILE = "plink-2b309-firebase-adminsdk-m2nbr-c17700bc21.json";
+
+    private static final String FIREBASE_CREDENTIALS_PATH = Path.of("META-INF", "resources",
+                    FIREBASE_CREDENTIALS_FILE)
+            .toString();
 
     private Firestore firestore;
 
@@ -46,9 +53,20 @@ public class FirestoreService {
     }
 
     private FirebaseApp initialize() throws IOException {
-        final String firebaseAdminJson = ConfigProvider.getConfig()
-                .getValue("firebase.adminsdk.jsonpath", String.class);
-        try (FileInputStream inputStream = new FileInputStream(firebaseAdminJson)) {
+        log.infof("reading firebase credentials from %s", FIREBASE_CREDENTIALS_PATH);
+
+        Optional.ofNullable(System.getenv("FIRESTORE_EMULATOR_HOST"))
+                .ifPresent(firestoreEmulatorHost -> log.infof("firestore running on emulator environment [%s]",
+                        firestoreEmulatorHost));
+
+        Optional.ofNullable(System.getenv("FIREBASE_AUTH_EMULATOR_HOST"))
+                .ifPresent(authEmulatorHost -> log.infof("auth running on emulator environment [%s]",
+                        authEmulatorHost));
+
+        try (InputStream inputStream =
+                     getClass().getClassLoader()
+                             .getResourceAsStream(FIREBASE_CREDENTIALS_PATH)) {
+            assert inputStream != null;
             FirebaseOptions options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(inputStream))
                     .setDatabaseUrl("https://plink-2b309.firebaseio.com")

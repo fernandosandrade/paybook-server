@@ -1,10 +1,12 @@
 package org.paybook.com.services.link_pagamento.dao;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.jackson.Jacksonized;
+import org.paybook.com.GoogleTimestampAdapter;
 import org.paybook.com.db.RepositoryMap;
 import org.paybook.com.services.link_pagamento.EnumStatusLinkPagamento;
 
@@ -27,6 +29,7 @@ public class LinkPagamentoPreviewModel implements RepositoryMap {
 
     private Integer valor;
 
+    @JsonDeserialize(using = GoogleTimestampAdapter.Deserializer.class)
     private Instant vencimento;
 
     private EnumStatusLinkPagamento status;

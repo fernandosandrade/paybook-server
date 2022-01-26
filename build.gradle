@@ -24,6 +24,7 @@ dependencies {
     implementation 'org.projectlombok:lombok:1.18.16'
     implementation 'org.immutables:value:2.8.8'
     implementation 'com.google.firebase:firebase-admin:8.0.1'
+    implementation 'io.quarkus:quarkus-container-image-docker:2.2.3.Final'
 //    implementation 'io.quarkus:quarkus-smallrye-openapi:2.0.0.CR3'
 
     //compileOnly("org.immutables:value-annotations:2.8.8")
